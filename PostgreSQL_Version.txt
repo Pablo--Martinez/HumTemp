@@ -1,0 +1,26 @@
+VERSIONES: 
+
+-1.0: Modulo principal.
+      PostgreSQL() => __init__(): Instancia la base de datos, creando la conexion con la base de datos "testdb" y su usuario es "pablo"
+		   => CreateTable(self,table_name,fields): Inserta una nueva tabla dentro de la base de datos
+		   => InsertRegisterInTable(self,table_name,register): Inserta una nueva tabla dentro de la base de datos con los parámetros pasados
+		   => UpdateRegisterInTable(self,table_name,consult, update_field): Actualiza un registro dentro de una tabla
+		   => SelectAllFromTable(self,table_name): Selecciona todos los registros dentro de una tabla
+		   => SelectFromTable(self,table_name,consult): Selecciona un registro en particular, determinado por la consulta
+		   => CopyToText(self,table_name,name): Copia el contenido de una tabla en 'name.txt'
+		   => CopyFromText(self,table_name,name): Inserta dentro de la tabla el contendido del archivo 'name.txt'
+		   => ClearTable(self,table_name): Elimina todos los registros dentro de la tabla y borra la tabla en cuestion
+		   => CloseDB(self): Termina la conexion con la base de datos "testdb" 
+
+-1.1: Se agrega una nueva funcion dentro del modulo
+      POstgreSQL() => DeleteRegisterInTable(self,table_name,consult): Elimina un registro en particular dentro de la tabla
+
+      Se actualizan las funciones, ahora no es necesario agregar el \' cuando algun campo es un string o las consultas son strings,
+      además las consultas pasan a ser una lista del tipo ["field","valor"] donde la consulta se realiza "field=valor", en este caso si 
+      "valor" es un string le agrega automaticamente el caracter especia \' para setearlo como tal.
+      
+      La conexion con __init__() ahora necesita el nombre de la db a la que se va a conectar y el usuario con el que se va a conectar,
+      los valores default son username=pablo y namedb=testdb, en caso de no existir la db en cuestion permite ser creada
+      
+      Se agrega una nueva funcion DeleteDB() que borra la db actual, para ello en necesario agregar un nuevo elemento a self que es el 
+      nombre de la db
