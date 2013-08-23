@@ -67,11 +67,10 @@ def Estado():
 	"""
 	db = PostgreSQL.PostgreSQL()
 	row = db.SelectFromTable(ctr,["id",1])
+	db.CloseDB()
 	if (row[0][4] == 1):
-		db.CloseDB()
 		return 1
 	else:
-		db.CloseDB()
 		return 0
 	
 def Nombre():
