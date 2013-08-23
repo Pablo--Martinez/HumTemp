@@ -1,0 +1,29 @@
+Istrucciones de instalación:
+	1) Instalar PostgreSQL: sudo apt-get install postgresql
+	2) Comprobar que el motor de la base esta corriendo: service postgresql status
+	   Debería retorar algo similar a: 
+		Running clusters: 9.1/main
+	  En caso de que no se así se debe iniciar el motor manualmente:
+		sudo service postgresql start
+	3) Crear el usuario pi para administrar la base de datos:
+		sudo -u postgresql createuser pi
+	   Se deben ingresar las siguientes opciones:
+		Shall the new role be a superuser? (y/n) n
+		Shall the new role be allowed to create databases? (y/n) y
+		Shall the new role be allowed to create more new roles? (y/n) n
+	4) Crear una nueva base de datos con el nombre testdb y propietario pi:
+		sudo -u postgresql createdb testdb -O pi
+	5) Crear la tabla de registros:
+		-psql testdb (Abre la base de datos)
+		-CREATE TABLE register (id INT PRIMARY KEY, name VARCHAR, gpio INTEGER, date TIMESTAMP, temp INTEGER, hum INTEGER) (Crea la tabla register)
+		-\q (Cierra la base)
+	6) Dar los permisos a root para que pueda insertar datos:
+		-psql testdb (Abre la base de datos)
+		-GRANT ALL ON TABLE register TO root; (Otorga los permisos a root)
+		-\q (Salir de la base de datos)
+	
+	LISTO!
+	
+	OBS: Es necesario que PostgreSQL.py, Adafruit_DHT2 se encuentre en la misma carpeta que
+	     Aplicacion.py para que todo funcione correctamente.
+
