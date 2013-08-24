@@ -13,13 +13,15 @@ Istrucciones de instalación:
 		Shall the new role be allowed to create more new roles? (y/n) n
 	4) Crear una nueva base de datos con el nombre testdb y propietario pi:
 		sudo -u postgresql createdb testdb -O pi
-	5) Crear la tabla de registros:
+	5) Crear la tabla de registros y control para la app:
 		-psql testdb (Abre la base de datos)
-		-CREATE TABLE register (id INT PRIMARY KEY, name VARCHAR, gpio INTEGER, date TIMESTAMP, temp INTEGER, hum INTEGER) (Crea la tabla register)
+		-CREATE TABLE register (id INT PRIMARY KEY, name VARCHAR, gpio INTEGER, date TIMESTAMP, temp INTEGER, hum INTEGER); (Crea la tabla register)
+		-CREATE TABLE control (id INT PRIMARY KEY, name VARCHAR, ciclo INTEGER, veces INTEGER, status INTEGER); (Crea la tabla de cotrol)
 		-\q (Cierra la base)
-	6) Dar los permisos a root para que pueda insertar datos:
+	6) Dar los permisos a root para que pueda insertar/modificar datos:
 		-psql testdb (Abre la base de datos)
-		-GRANT ALL ON TABLE register TO root; (Otorga los permisos a root)
+		-GRANT ALL ON TABLE register TO root; (Otorga los permisos a root sobre register)
+		-GRANT ALL ON TABLE control TO root; (Otorga los permisos a root sobre control)
 		-\q (Salir de la base de datos)
 	
 	LISTO!
