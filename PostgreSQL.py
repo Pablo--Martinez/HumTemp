@@ -211,7 +211,15 @@ class PostgreSQL():
 		except IOError, e:    
 			print 'Error %s' % e   
 			#sys.exit(1)
-		
+
+	def GivePermissions(self,table_name,user_name):
+		"""
+		Da todos los permisos a "user_name" sobre la tabla "tabe_name"
+		"""
+		command = "GRANT ALL ON " + table_name + " TO " + user_name
+		self.cursor.execute(command)
+		self.conexion.commit() 
+			
 	def DeleteRegisterInTable(self,table_name,consult):
 		"""
 		Borra el elemento/s dentro de 'table_name' que cumple/n la consulta

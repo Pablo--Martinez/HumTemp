@@ -5,8 +5,9 @@ Istrucciones de instalación:
 		Running clusters: 9.1/main
 	  En caso de que no se así se debe iniciar el motor manualmente:
 		sudo service postgresql start
-	3) Crear el usuario pi para administrar la base de datos:
+	3) Crear el usuario pi y root para administrar la base de datos:
 		sudo -u postgresql createuser pi
+		sudo -u postgresql createuser root
 	   Se deben ingresar las siguientes opciones:
 		Shall the new role be a superuser? (y/n) n
 		Shall the new role be allowed to create databases? (y/n) y
