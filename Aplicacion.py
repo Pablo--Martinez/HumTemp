@@ -14,7 +14,7 @@ pines = ["4","17","18","22","23","24","25","27"]
 errores = ["Ya hay una sesion activa..","Debe terminar la sesion activa para bajar datos..",
 			"No existe sesion activa actualmente.."]
 
-def IniciarCensado(nombre,ciclo,terminal):
+def IniciarCensado(nombre,ciclo,sensor,terminal):
 		"""
 		Inicia el ciclo de sensado, los datos son almacenados cada "ciclo" minutos
 		bajo el nombre de "nombre", se asume que no esta censando actualmente
@@ -25,13 +25,17 @@ def IniciarCensado(nombre,ciclo,terminal):
 			db.UpdateRegisterInTable(ctr,["id",1],["ciclo",ciclo-1])
 			db.UpdateRegisterInTable(ctr,["id",1],["veces",0])
 			db.UpdateRegisterInTable(ctr,["id",1],["status",1])
+			if (sensor == "DHT11"):
+				db.UpdateRegisterInTable(ctr,["id",1],["sensor",11])
+			else:
+				db.UpdateRegisterInTable(ctr,["id",1],["sensor",22])
 		except: #No existe control
-			db.CreateTable(ctr,["name VARCHAR","ciclo INTEGER","veces INTEGER","status INTEGER"])
+			db.CreateTable(ctr,["name VARCHAR","ciclo INTEGER","veces INTEGER","status INTEGER","sensor INTEGER"])
 			db.InsertRegisterInTable(ctr,[nombre,ciclo-1,0,1])
 		db.CloseDB()
 		if (not terminal):
 			gtk.main_quit()
-			os.system(os.getcwd() + "/Aplicacion2.py" )
+			os.system(os.getcwd() + "/Aplicacion.py" )
 				
 def TerminarCensado(terminal):
 	"""
@@ -42,7 +46,7 @@ def TerminarCensado(terminal):
 	db.CloseDB()
 	if (not terminal):
 		gtk.main_quit()
-		os.system(os.getcwd() + "/Aplicacion2.py" )
+		os.system(os.getcwd() + "/Aplicacion.py" )
 			
 def BajarDatos(): 
 	"""
@@ -90,6 +94,15 @@ def Ciclo():
 	row = db.SelectFromTable(ctr,["id",1])
 	db.CloseDB()
 	return row[0][2] + 1
+	
+def Sensor():
+	"""
+	Retorna el tipo de sensor
+	"""
+	db = PostgreSQL.PostgreSQL()
+	row = db.SelectFromTable(ctr,["id",1])
+	db.CloseDB()
+	return row[0][5]
 
 class GUI_Error():
 	def __init__(self,texto):
@@ -145,12 +158,14 @@ class GUI_app():
 		boton_salir.connect('clicked',lambda a: gtk.main_quit())
 		label_nombre = gtk.Label("Nombre")
 		label_ciclo = gtk.Label("Ciclo(min)")
-	
+		label_menu = gtk.Label("Sensor")
+		
 		if (Estado() == 1): #Actualmente midiendo
 			valor_estado = gtk.Label()
 			valor_estado.set_markup('<span color="green">CENSANDO</span>');
 			entry_nombre = gtk.Label(Nombre())
 			entry_ciclo = gtk.Label(Ciclo())
+			menu = gtk.Label("DHT" + str(Sensor()))
 			#Establezco la conexion entre botones y funciones
 			boton_inicio.connect("clicked",lambda a:GUI_Error(errores[0]))
 			boton_detener.connect("clicked",lambda a:TerminarCensado(0))
@@ -166,8 +181,12 @@ class GUI_app():
 			entry_ciclo = gtk.Entry()
 			entry_nombre.set_text("Ingrese el nombre para ser guardaro..")
 			entry_ciclo.set_text("Tiempo en minutos entre medidas...")
+			#Menu desplegable para selecionar el sensor
+			menu = gtk.Combo()
+			opciones = ["DHT11","DHT22"]
+			menu.set_popdown_strings(opciones)
 			#Establezco la conexion entre botones y funciones
-			boton_inicio.connect('clicked',lambda a:IniciarCensado(entry_nombre.get_text(),int(entry_ciclo.get_text(),0)))
+			boton_inicio.connect('clicked',lambda a:IniciarCensado(entry_nombre.get_text(),int(entry_ciclo.get_text()),menu.entry.get_text(),0))
 			boton_detener.connect("clicked",lambda a:GUI_Error(errores[2]))
 			boton_bajar.connect('clicked',lambda a:BajarDatos())
 			for i in range(8):
@@ -177,10 +196,12 @@ class GUI_app():
 		vbox1.pack_start(label_estado)
 		vbox1.pack_start(label_nombre)
 		vbox1.pack_start(label_ciclo)
+		vbox1.pack_start(label_menu)
 	
 		vbox2.pack_start(valor_estado)
 		vbox2.pack_start(entry_nombre)
 		vbox2.pack_start(entry_ciclo)
+		vbox2.pack_start(menu)
 	
 		hbox_main.pack_start(vbox1)
 		hbox_main.pack_start(vbox2)
@@ -210,10 +231,10 @@ class Terminal():
 		comando = raw_input("BIOGUARD $ ").split(" ")
 		while (comando[0] != "salir"):
 			if (comando[0] == "iniciar"): #Inicio de sesion
-				if (len(comando) >= 3): #Cantidad de comandos correctos
+				if (len(comando) >= 4): #Cantidad de comandos correctos
 					if (Estado() == 0): #No se esta censando acutalmente
 						if (type(comando[2] == "int")): #El ciclo es un numero
-							IniciarCensado(comando[1],int(comando[2]),1)
+							IniciarCensado(comando[1],int(comando[2]),comando[3],1)
 							print("Sesion iniciada...")
 						else:
 							print("ciclo incorrecto...")
@@ -234,6 +255,10 @@ class Terminal():
 					print("	-Estado --> Corriendo")
 					print("	-Nombre --> %s" %(Nombre()))
 					print("	-Ciclo --> %i" %(Ciclo()))
+					if (Sensor() == 11):
+						print("	-Sensor --> DHT11")
+					else:
+						print("	-Sensor --> DHT22")
 				else:
 					print("	-Estado --> Detenido")
 					
@@ -246,7 +271,7 @@ class Terminal():
 			
 			elif(comando[0] == "ayuda"): #Imprimo ayuda en pantalla
 				print("	-ayuda --> Menu de ayuda")
-				print("	-iniciar nombre ciclo --> Crea una nueva sesion")
+				print("	-iniciar nombre ciclo sensor(DHT11/DHT22) --> Crea una nueva sesion")
 				print("	-terminar --> Termina la sesion actual")
 				print("	-bajar --> Baja los datos de la sesion actual")
 				print("	-status --> Muestra el estado del sistema ")

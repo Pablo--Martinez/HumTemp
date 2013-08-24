@@ -15,8 +15,9 @@ if status[0][4] == 1:#Esta corriendo
                 db.UpdateRegisterInTable("control",["id",1],["veces",0]) #Actualizo
                 date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M') #Momento de medicion
                 name = status[0][1]
+                sensor = status[0][5]
                 for i in range(len(pins)):
-                        salida = subprocess.Popen(["sudo","/home/pi/Desktop/Python/Adafruit_DHT2","11",pins[i]],stdout=subprocess.PIPE).communicate()[0]
+                        salida = subprocess.Popen(["sudo","/home/pi/Desktop/Python/Adafruit_DHT2",sensor,pins[i]],stdout=subprocess.PIPE).communicate()[0]
                         values.append(salida)
                         if (values[i] != ""): #Hay sensor en ese pin
                                 temp = int(values[i].split(" ")[0])
