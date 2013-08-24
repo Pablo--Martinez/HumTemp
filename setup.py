@@ -2,7 +2,7 @@
 Modulo encargado de preparar el sistema para poder realizar las mediciones
 """
 import subprocess
-import PostgreSQL.py
+import PostgreSQL
 
 print("Instalando PostgreSQL...")
 subprocess.call(["sudo","apt-get","install","postgresql"])
@@ -27,7 +27,8 @@ print("Conexion realizada!")
 
 print("Creando nuevas tablas...")
 db.CreateTable("register",["name VARCHAR","gpio INTEGER","date TIMESTAMP","temp INTEGER","hum INTEGER"])
-db.CreateTable("control",["name VARCHAR","ciclo INTEGER","veces INTEGER","status INTEGER"])
+db.CreateTable("control",["name VARCHAR","ciclo INTEGER","veces INTEGER","status INTEGER","sensor INTEGER"])
+db.InsertRegisterInTable("control",["name",0,0,0,11])
 print("Tablas creadas!")
 
 print("Otorgando permisos...")
