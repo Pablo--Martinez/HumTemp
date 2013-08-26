@@ -19,7 +19,6 @@ def IniciarCensado(nombre,ciclo,sensor,terminal):
 		Inicia el ciclo de sensado, los datos son almacenados cada "ciclo" minutos
 		bajo el nombre de "nombre", se asume que no esta censando actualmente
 		"""
-		db = PostgreSQL.PostgreSQL()
 		if (Estado() == 0):
 			db = PostgreSQL.PostgreSQL()
 			try: #Intento modificar control a la db
