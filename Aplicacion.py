@@ -11,8 +11,8 @@ import sys
 ctr = "control"
 separador = ";"
 pines = ["4","17","18","22","23","24","25","27"]
-errores = ["Ya hay una sesion activa..","Debe terminar la sesion activa para bajar datos..",
-			"No existe sesion activa actualmente.."]
+errores = ["Ya existe sesion activa","Debe terminar la sesion activa para bajar datos",
+			"No existe sesion activa actualmente","No es posible bajar datos de sesion actual"]
 
 def IniciarCensado(nombre,ciclo,sensor,terminal):
 		"""
@@ -20,50 +20,91 @@ def IniciarCensado(nombre,ciclo,sensor,terminal):
 		bajo el nombre de "nombre", se asume que no esta censando actualmente
 		"""
 		db = PostgreSQL.PostgreSQL()
-		try: #Intento modificar control a la db
-			db.UpdateRegisterInTable(ctr,["id",1],["name",nombre])
-			db.UpdateRegisterInTable(ctr,["id",1],["ciclo",ciclo-1])
-			db.UpdateRegisterInTable(ctr,["id",1],["veces",0])
-			db.UpdateRegisterInTable(ctr,["id",1],["status",1])
-			if (sensor == "DHT11"):
-				db.UpdateRegisterInTable(ctr,["id",1],["sensor",11])
+		if (Estado() == 0):
+			db = PostgreSQL.PostgreSQL()
+			try: #Intento modificar control a la db
+				db.UpdateRegisterInTable(ctr,["id",1],["name",nombre])
+				db.UpdateRegisterInTable(ctr,["id",1],["ciclo",ciclo-1])
+				db.UpdateRegisterInTable(ctr,["id",1],["veces",0])
+				db.UpdateRegisterInTable(ctr,["id",1],["status",1])
+				if (sensor == "DHT11"):
+					db.UpdateRegisterInTable(ctr,["id",1],["sensor",11])
+				else:
+					db.UpdateRegisterInTable(ctr,["id",1],["sensor",22])
+			except: #No existe control
+				db.CreateTable(ctr,["name VARCHAR","ciclo INTEGER","veces INTEGER","status INTEGER","sensor INTEGER"])
+				db.InsertRegisterInTable(ctr,[nombre,ciclo-1,0,1,11])
+				db.UpdateRegisterInTable(ctr,["id",1],["name",nombre])
+				db.UpdateRegisterInTable(ctr,["id",1],["ciclo",ciclo-1])
+				db.UpdateRegisterInTable(ctr,["id",1],["veces",0])
+				db.UpdateRegisterInTable(ctr,["id",1],["status",1])
+				if (sensor == "DHT11"):
+					db.UpdateRegisterInTable(ctr,["id",1],["sensor",11])
+				else:
+					db.UpdateRegisterInTable(ctr,["id",1],["sensor",22])
+			db.CloseDB()
+			
+			if (not terminal):
+				GUI_Mensaje("%s: Sesion iniciada"%(Nombre()))
+				gtk.main_quit()
+				os.system(os.getcwd() + "/Aplicacion.py" )
 			else:
-				db.UpdateRegisterInTable(ctr,["id",1],["sensor",22])
-		except: #No existe control
-			db.CreateTable(ctr,["name VARCHAR","ciclo INTEGER","veces INTEGER","status INTEGER","sensor INTEGER"])
-			db.InsertRegisterInTable(ctr,[nombre,ciclo-1,0,1])
-		db.CloseDB()
-		if (not terminal):
-			gtk.main_quit()
-			os.system(os.getcwd() + "/Aplicacion.py" )
+				print("%s: Sesion iniciada"%(Nombre()))
+		else:
+			if (not terminal):
+				GUI_Mensaje(errores[0])
+			else:
+				print(errores[0])
 				
 def TerminarCensado(terminal):
 	"""
 	Cancela el censado actual, asume que actualmente se esta censando
 	"""
 	db = PostgreSQL.PostgreSQL()
-	db.UpdateRegisterInTable(ctr,["id",1],["status",0])
+	if (Estado() == 1):
+		db.UpdateRegisterInTable(ctr,["id",1],["status",0])
+		if (not terminal):
+			GUI_Mensaje("%s: Sesion terminada"%(Nombre()))
+			gtk.main_quit()
+			os.system(os.getcwd() + "/Aplicacion.py" )
+		else:
+			print("%s: Sesion terminada"%(Nombre()))
+	else:
+		if (not terminal):
+			GUI_Mensaje(errores[2])
+		else:
+			print(errores[2])
 	db.CloseDB()
-	if (not terminal):
-		gtk.main_quit()
-		os.system(os.getcwd() + "/Aplicacion.py" )
 			
-def BajarDatos(): 
+def BajarDatos(nombre,terminal): 
 	"""
-	Baja los datos de la db del ulitmo ciclo de censado, es decir donde el 
-	nombre es el guardado el almacenado en control.
-	Asume que el ciclo de censado ya termino
+	Baja los datos de la sesion con nombre pasado como parametro
 	"""
-	db = PostgreSQL.PostgreSQL()
-	row = db.SelectFromTable(ctr,["id",1])
-	rows = db.SelectFromTable("register",["name",row[0][1]])
-	if (len(rows) > 0):
-		f = open(row[0][1] + "_datos.txt","w")
-		for elem in rows:
-			line = elem[1] + separador + str(elem[2]) + separador + str(elem[3]) + separador + str(elem[4]) + separador + str(elem[5])
-			f.write(line + "\n")
-		f.close()
-	db.CloseDB()
+	if (Nombre() != nombre or Estado() == 0):
+		db = PostgreSQL.PostgreSQL()
+		row = db.SelectFromTable(ctr,["id",1])
+		rows = db.SelectFromTable("register",["name",nombre])
+		if (len(rows) > 0):
+			f = open(nombre + "_datos.txt","w")
+			for elem in rows:
+				line = elem[1] + separador + str(elem[2]) + separador + str(elem[3]) + separador + str(elem[4]) + separador + str(elem[5])
+				f.write(line + "\n")
+			f.close()
+			if (not terminal):
+				GUI_Mensaje("%s: Datos guardados correctamente" %(nombre))
+			else:
+				print("%s: Datos guardados correctamente" %(nombre))		
+		else:
+			if (not terminal):
+				GUI_Mensaje("%s: No existen registros" %(nombre))
+			else:
+				print("%s: No existen registros" %(nombre))	
+		db.CloseDB()
+	else:
+		if (not terminal):
+			GUI_Mensaje(errores[3])
+		else:
+			print(errores[3])	
 	
 def Estado():
 	"""
@@ -104,11 +145,10 @@ def Sensor():
 	db.CloseDB()
 	return row[0][5]
 
-class GUI_Error():
+class GUI_Mensaje():
 	def __init__(self,texto):
-		#error = gtk.MessageDialog()
 		error = gtk.MessageDialog(parent=None, flags=0, buttons=gtk.BUTTONS_OK)
-		error.set_title("BioGuard-Error!")
+		error.set_title("BioGuard")
 		error.set_size_request(400,150)
 		error.connect("delete-event", gtk.main_quit)
 		label = gtk.Label(texto)
@@ -116,14 +156,13 @@ class GUI_Error():
 		error.show_all()
 		error.run()
 		error.destroy()
-		#error.main()
-		
+				
 class GUI_app():
 	def __init__(self):
 		#Creo la ventana
 		gui = gtk.Window(gtk.WINDOW_TOPLEVEL)
 		gui.set_title("BioGuard")
-		gui.set_size_request(600,250)
+		gui.set_size_request(600,270)
 		gui.set_position(gtk.WIN_POS_CENTER)
 		gui.connect("delete-event", gtk.main_quit)
 	
@@ -159,17 +198,20 @@ class GUI_app():
 		label_nombre = gtk.Label("Nombre")
 		label_ciclo = gtk.Label("Ciclo(min)")
 		label_menu = gtk.Label("Sensor")
+		label_bajar = gtk.Label("Datos a bajar:")
+		entry_bajar = gtk.Entry()
+		entry_bajar.set_text("Nombre de sesion a bajar...")
 		
+				
 		if (Estado() == 1): #Actualmente midiendo
 			valor_estado = gtk.Label()
 			valor_estado.set_markup('<span color="green">CENSANDO</span>');
 			entry_nombre = gtk.Label(Nombre())
 			entry_ciclo = gtk.Label(Ciclo())
 			menu = gtk.Label("DHT" + str(Sensor()))
-			#Establezco la conexion entre botones y funciones
-			boton_inicio.connect("clicked",lambda a:GUI_Error(errores[0]))
+			boton_inicio.connect("clicked",lambda a:IniciarCensado("","","",0))
 			boton_detener.connect("clicked",lambda a:TerminarCensado(0))
-			boton_bajar.connect("clicked",lambda a:GUI_Error(errores[1]))
+			boton_bajar.connect("clicked",lambda a:BajarDatos(entry_bajar.get_text(),0))
 			#for i in range(8):
 			#	labels_gpios[i][1] = subprocess.Popen(["sudo","/home/pi/Desktop/Python/Adafruit_DHT2","11",pines[i]],stdout=subprocess.PIPE).communicate()[0]
 
@@ -187,8 +229,8 @@ class GUI_app():
 			menu.set_popdown_strings(opciones)
 			#Establezco la conexion entre botones y funciones
 			boton_inicio.connect('clicked',lambda a:IniciarCensado(entry_nombre.get_text(),int(entry_ciclo.get_text()),menu.entry.get_text(),0))
-			boton_detener.connect("clicked",lambda a:GUI_Error(errores[2]))
-			boton_bajar.connect('clicked',lambda a:BajarDatos())
+			boton_detener.connect("clicked",lambda a:TerminarCensado(0))
+			boton_bajar.connect('clicked',lambda a:BajarDatos(entry_bajar.get_text(),0))
 			for i in range(8):
 				labels_gpios[i][1].set_text("-")
 					
@@ -202,18 +244,24 @@ class GUI_app():
 		vbox2.pack_start(entry_nombre)
 		vbox2.pack_start(entry_ciclo)
 		vbox2.pack_start(menu)
-	
+		
+		hbox_bajar = gtk.HBox()
+		hbox_bajar.pack_start(label_bajar)
+		hbox_bajar.pack_start(entry_bajar)
+			
 		hbox_main.pack_start(vbox1)
 		hbox_main.pack_start(vbox2)
 	
 		hbox_botones.pack_start(boton_inicio)
 		hbox_botones.pack_start(boton_detener)
-		hbox_botones.pack_start(boton_bajar)
+		#hbox_botones.pack_start(boton_bajar)
 	
 		vbox_main.pack_start(hbox_main)
 		vbox_main.pack_start(hbox_valores1)
 		vbox_main.pack_start(hbox_valores2)
 		vbox_main.pack_start(hbox_botones)
+		vbox_main.pack_start(hbox_bajar)
+		vbox_main.pack_start(boton_bajar)
 		vbox_main.pack_start(boton_salir)
 	
 		#Agrego el box principal y muestro en pantalla
@@ -244,12 +292,8 @@ class Terminal():
 					print("Argumentos faltantes...")
 		
 			elif(comando[0] == "terminar"): #Terminar sesion activa
-				if (Estado() == 1):
-					TerminarCensado(1)
-					print("Sesion terminada...")
-				else:
-					print(error[2])
-		
+				TerminarCensado(1)
+						
 			elif(comando[0] == "status"): #Imprimo los valores actuales de la sesion si esta activa
 				if (Estado() == 1):
 					print("	-Estado --> Corriendo")
@@ -263,12 +307,11 @@ class Terminal():
 					print("	-Estado --> Detenido")
 					
 			elif(comando[0] == "bajar"): #Bajo los datos de la sesion actual
-				if (Estado() == 0):
-					BajarDatos()
-					print("Datos guardados correctamente...")
+				if (len(comando) >= 2):
+					BajarDatos(comando[1],1)
 				else:
-					print(errores[1])
-			
+					print("Argumentos faltantes...")
+					
 			elif(comando[0] == "ayuda"): #Imprimo ayuda en pantalla
 				print("	-ayuda --> Menu de ayuda")
 				print("	-iniciar nombre ciclo sensor(DHT11/DHT22) --> Crea una nueva sesion")
