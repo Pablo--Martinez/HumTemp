@@ -17,9 +17,9 @@ try: #Intento correr el script
                         salida = subprocess.Popen(["sudo","./Adafruit_DHT2",sys.argv[1],pins[i]],stdout=subprocess.PIPE).communicate()[0]
                         values.append(salida)
                         if (values[i] != ""): #Hay sensor en ese pin
-                                print("GPIO_%s --> STATUS: %s"%(pins[i],status[0]))
+                                print("GPIO_%s --> STATUS: \033[1;%s\033[1;m"%(pins[i],status[0]))
                         else: #No hay sensor conectado
-                                print("GPIO_%s --> STATUS: %s"%(pins[i],status[1]))
+                                print("GPIO_%s --> STATUS: \033[1;31m%s\033[1;m"%(pins[i],status[1]))
         else: #Falta argumento del sensor
                 print("Tipo de sensor faltante, ejecute: sudo ./Test.py sensor")
 except: #No se corrio con privilegios de root
