@@ -1,8 +1,9 @@
+#!/usr/bin/python
+
 """
 Modulo encargado de preparar el sistema para poder realizar las mediciones
 """
 import subprocess
-import PostgreSQL
 
 print("Instalando PostgreSQL...")
 subprocess.call(["sudo","apt-get","install","postgresql"])
@@ -22,13 +23,14 @@ subproces.call(["sudo","-u","postgresql","createdb","testdb","-O","pi"])
 print("Base de datos creada!")
 
 print("Conectando con base de datos...")
+import PostgreSQL
 db = PostgreSQL.PostgreSQL("testdb","pi")
 print("Conexion realizada!")
 
 print("Creando nuevas tablas...")
-db.CreateTable("register",["name VARCHAR","gpio INTEGER","date TIMESTAMP","temp INTEGER","hum INTEGER"])
+db.CreateTable("register",["name VARCHAR","gpio INTEGER","date TIMESTAMP","temp FLOAT","hum FLOAT"])
 db.CreateTable("control",["name VARCHAR","ciclo INTEGER","veces INTEGER","status INTEGER","sensor INTEGER"])
-db.InsertRegisterInTable("control",["name",0,0,0,11])
+db.InsertRegisterInTable("control",["name",0,0,0,22])
 print("Tablas creadas!")
 
 print("Otorgando permisos...")

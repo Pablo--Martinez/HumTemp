@@ -20,8 +20,8 @@ if status[0][4] == 1:#Esta corriendo
                         salida = subprocess.Popen(["sudo","/home/pi/Desktop/Python/Adafruit_DHT2",str(sensor),pins[i]],stdout=subprocess.PIPE).communicate()[0]
                         values.append(salida)
                         if (values[i] != ""): #Hay sensor en ese pin
-                                temp = int(values[i].split(" ")[0])
-                                hum = int(values[i].split(" ")[1])                                
+                                temp = float(values[i].split(" ")[0])
+                                hum = float(values[i].split(" ")[1])                                
                                 db.InsertRegisterInTable("Register",[name,int(pins[i]),date,temp,hum])
         else:
                 veces = status[0][3]
