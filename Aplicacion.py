@@ -46,7 +46,7 @@ def IniciarCensado(nombre,ciclo,sensor,terminal):
 			if (not terminal):
 				GUI_Mensaje("%s: Sesion iniciada"%(Nombre()))
 				gtk.main_quit()
-				os.system(os.getcwd() + "/Aplicacion.py" )
+				GUI_app()
 			else:
 				print("%s: Sesion iniciada"%(Nombre()))
 		else:
@@ -65,7 +65,7 @@ def TerminarCensado(terminal):
 		if (not terminal):
 			GUI_Mensaje("%s: Sesion terminada"%(Nombre()))
 			gtk.main_quit()
-			os.system(os.getcwd() + "/Aplicacion.py" )
+			GUI_app()
 		else:
 			print("%s: Sesion terminada"%(Nombre()))
 	else:
@@ -201,20 +201,22 @@ class GUI_app():
 		entry_bajar = gtk.Entry()
 		entry_bajar.set_text("Nombre de sesion a bajar...")
 		
-				
 		if (Estado() == 1): #Actualmente midiendo
 			valor_estado = gtk.Label()
-			valor_estado.set_markup('<span color="green">CENSANDO</span>');
+			valor_estado.set_markup('<span color="green">CENSANDO</span>')
 			entry_nombre = gtk.Label(Nombre())
 			entry_ciclo = gtk.Label(Ciclo())
 			menu = gtk.Label("DHT" + str(Sensor()))
 			boton_inicio.connect("clicked",lambda a:IniciarCensado("","","",0))
 			boton_detener.connect("clicked",lambda a:TerminarCensado(0))
 			boton_bajar.connect("clicked",lambda a:BajarDatos(entry_bajar.get_text(),0))
-			#for i in range(8):
-			#	labels_gpios[i][1] = subprocess.Popen(["sudo","/home/pi/Desktop/Python/Adafruit_DHT2","11",pines[i]],stdout=subprocess.PIPE).communicate()[0]
-
-	
+			"""
+			for i in range(8):
+				if (subprocess.Popen(["sudo","/home/pi/Desktop/Python/Adafruit_DHT2","11",pines[i]],stdout=subprocess.PIPE).communicate()[0] != ""):
+					labels_gpios[i][1] = "OK"
+				else:
+					labels_gpios[i][1] = "-"
+			"""
 		else: #No esta midiendo
 			valor_estado = gtk.Label()
 			valor_estado.set_markup('<span color="red">SIN CENSAR</span>');
@@ -232,13 +234,13 @@ class GUI_app():
 			boton_bajar.connect('clicked',lambda a:BajarDatos(entry_bajar.get_text(),0))
 			for i in range(8):
 				labels_gpios[i][1].set_text("-")
-					
+				
 		#Empaqueto los botones,labels y entradas en los boxes
 		vbox1.pack_start(label_estado)
 		vbox1.pack_start(label_nombre)
 		vbox1.pack_start(label_ciclo)
 		vbox1.pack_start(label_menu)
-	
+		
 		vbox2.pack_start(valor_estado)
 		vbox2.pack_start(entry_nombre)
 		vbox2.pack_start(entry_ciclo)
@@ -250,11 +252,10 @@ class GUI_app():
 			
 		hbox_main.pack_start(vbox1)
 		hbox_main.pack_start(vbox2)
-	
+		
 		hbox_botones.pack_start(boton_inicio)
 		hbox_botones.pack_start(boton_detener)
-		#hbox_botones.pack_start(boton_bajar)
-	
+			
 		vbox_main.pack_start(hbox_main)
 		vbox_main.pack_start(hbox_valores1)
 		vbox_main.pack_start(hbox_valores2)
@@ -267,7 +268,7 @@ class GUI_app():
 		gui.add(vbox_main)
 		gui.show_all()
 		gtk.main()
-		
+						
 class Terminal():
 	"""
 	Permite ejecutar la aplicacion en version terminal
@@ -315,7 +316,7 @@ class Terminal():
 				print("	-ayuda --> Menu de ayuda")
 				print("	-iniciar nombre ciclo sensor(DHT11/DHT22) --> Crea una nueva sesion")
 				print("	-terminar --> Termina la sesion actual")
-				print("	-bajar --> Baja los datos de la sesion actual")
+				print("	-bajar nombre --> Baja los datos de la sesion actual")
 				print("	-status --> Muestra el estado del sistema ")
 			
 			else:
