@@ -143,7 +143,7 @@ int readDHT(int type, int pin) {
         f /= 10.0;
         if (data[2] & 0x80)  f *= -1;
 	//printf("Temp =  %.1f *C, Hum = %.1f \%\n", f, h);
-	printf("%.0f %.0f",f,h);
+	printf("%.1f %.1f",f,h);
     }
     return 1;
   }
