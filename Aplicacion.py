@@ -20,7 +20,7 @@ def IniciarCensado(nombre,ciclo,sensor,terminal):
 		bajo el nombre de "nombre", se asume que no esta censando actualmente
 		"""
 		if (Estado() == 0):
-			db = PostgreSQL.PostgreSQL()
+			db = PostgreSQL.PostgreSQL("testdb","pi")
 			try: #Intento modificar control a la db
 				db.UpdateRegisterInTable(ctr,["id",1],["name",nombre])
 				db.UpdateRegisterInTable(ctr,["id",1],["ciclo",ciclo-1])
@@ -59,7 +59,7 @@ def TerminarCensado(terminal):
 	"""
 	Cancela el censado actual, asume que actualmente se esta censando
 	"""
-	db = PostgreSQL.PostgreSQL()
+	db = PostgreSQL.PostgreSQL("testdb","pi")
 	if (Estado() == 1):
 		db.UpdateRegisterInTable(ctr,["id",1],["status",0])
 		if (not terminal):
@@ -80,7 +80,7 @@ def BajarDatos(nombre,terminal):
 	Baja los datos de la sesion con nombre pasado como parametro
 	"""
 	if (Nombre() != nombre or Estado() == 0):
-		db = PostgreSQL.PostgreSQL()
+		db = PostgreSQL.PostgreSQL("testdb","pi")
 		row = db.SelectFromTable(ctr,["id",1])
 		rows = db.SelectFromTable("register",["name",nombre])
 		if (len(rows) > 0):
@@ -109,7 +109,7 @@ def Estado():
 	"""
 	Retorna el estado actual del censado
 	"""
-	db = PostgreSQL.PostgreSQL()
+	db = PostgreSQL.PostgreSQL("testdb","pi")
 	row = db.SelectFromTable(ctr,["id",1])
 	db.CloseDB()
 	if (row[0][4] == 1):
@@ -121,7 +121,7 @@ def Nombre():
 	"""
 	Retorna el nombre del censado actual
 	"""
-	db = PostgreSQL.PostgreSQL()
+	db = PostgreSQL.PostgreSQL("testdb","pi")
 	row = db.SelectFromTable(ctr,["id",1])
 	db.CloseDB()
 	return row[0][1]
@@ -130,7 +130,7 @@ def Ciclo():
 	"""
 	Retorna el ciclo del censado actual
 	"""
-	db = PostgreSQL.PostgreSQL()
+	db = PostgreSQL.PostgreSQL("testdb","pi")
 	row = db.SelectFromTable(ctr,["id",1])
 	db.CloseDB()
 	return row[0][2] + 1
@@ -139,7 +139,7 @@ def Sensor():
 	"""
 	Retorna el tipo de sensor
 	"""
-	db = PostgreSQL.PostgreSQL()
+	db = PostgreSQL.PostgreSQL("testdb","pi")
 	row = db.SelectFromTable(ctr,["id",1])
 	db.CloseDB()
 	return row[0][5]
@@ -210,13 +210,12 @@ class GUI_app():
 			boton_inicio.connect("clicked",lambda a:IniciarCensado("","","",0))
 			boton_detener.connect("clicked",lambda a:TerminarCensado(0))
 			boton_bajar.connect("clicked",lambda a:BajarDatos(entry_bajar.get_text(),0))
-			"""
 			for i in range(8):
-				if (subprocess.Popen(["sudo","/home/pi/Desktop/Python/Adafruit_DHT2","11",pines[i]],stdout=subprocess.PIPE).communicate()[0] != ""):
-					labels_gpios[i][1] = "OK"
+				if (subprocess.Popen(["sudo","/home/pi/Desktop/Python/Adafruit_DHT2",str(Sensor()),pines[i]],stdout=subprocess.PIPE).communicate()[0] != ""):
+					labels_gpios[i][1].set_text("OK")
 				else:
-					labels_gpios[i][1] = "-"
-			"""
+					labels_gpios[i][1].set_text("-")
+			
 		else: #No esta midiendo
 			valor_estado = gtk.Label()
 			valor_estado.set_markup('<span color="red">SIN CENSAR</span>');

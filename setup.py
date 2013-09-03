@@ -7,19 +7,20 @@ import subprocess
 
 print("Instalando PostgreSQL...")
 subprocess.call(["sudo","apt-get","install","postgresql"])
-print("Instalación completada!")
+print("Instalacion completada!")
 
 print("Iniciando motor de base de datos...")
 subprocess.call(["sudo","service","postgresql","start"])
+subprocess.call(["sudo","apt-get","install","python-psycopg2"])
 print("Motor iniciado!")
 
 print("Creando nuevo usuario...")
 subprocess.call(["sudo","-u","postgresql","createuser","pi"])#Se deben insertar las opciones adecuadas
-subporcess.call(["sudo","-u","postgresql","createuser","root"])
+subprocess.call(["sudo","-u","postgresql","createuser","root"])
 print("Nuevo usuario creado!")
 
 print("Creando nueva base de datos...")
-subproces.call(["sudo","-u","postgresql","createdb","testdb","-O","pi"])
+subprocess.call(["sudo","-u","postgresql","createdb","testdb","-O","pi"])
 print("Base de datos creada!")
 
 print("Conectando con base de datos...")
@@ -41,6 +42,10 @@ print("Permisos otorgados!")
 print("Cerrando conexion con base de datos...")
 db.CloseDB()
 print("Conexion terminada!")
+
+print("Instalando GTK...")
+subprocess.call(["sudo","apt-get","install","python-gtk2"])
+print("Instalacion completada!")
 
 print("Proceso finalizado!")
 

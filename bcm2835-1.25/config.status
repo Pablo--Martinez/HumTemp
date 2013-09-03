@@ -437,11 +437,11 @@ Copyright (C) 2012 Free Software Foundation, Inc.
 This config.status script is free software; the Free Software Foundation
 gives unlimited permission to copy, distribute and modify it."
 
-ac_pwd='/home/pablo/bcm2835-1.25'
+ac_pwd='/home/pi/Desktop/HumTemp/bcm2835-1.25'
 srcdir='.'
 INSTALL='/usr/bin/install -c'
 MKDIR_P='/bin/mkdir -p'
-AWK='gawk'
+AWK='mawk'
 test -n "$AWK" || AWK=awk
 # The default lists apply if the user does not specify any file.
 ac_need_defaults=:
@@ -647,17 +647,17 @@ S["am__tar"]="$${TAR-tar} chof - \"$$tardir\""
 S["AMTAR"]="$${TAR-tar}"
 S["am__leading_dot"]="."
 S["SET_MAKE"]=""
-S["AWK"]="gawk"
+S["AWK"]="mawk"
 S["mkdir_p"]="/bin/mkdir -p"
 S["MKDIR_P"]="/bin/mkdir -p"
 S["INSTALL_STRIP_PROGRAM"]="$(install_sh) -c -s"
 S["STRIP"]=""
-S["install_sh"]="${SHELL} /home/pablo/bcm2835-1.25/install-sh"
-S["MAKEINFO"]="${SHELL} /home/pablo/bcm2835-1.25/missing --run makeinfo"
-S["AUTOHEADER"]="${SHELL} /home/pablo/bcm2835-1.25/missing --run autoheader"
-S["AUTOMAKE"]="${SHELL} /home/pablo/bcm2835-1.25/missing --run automake-1.12"
-S["AUTOCONF"]="${SHELL} /home/pablo/bcm2835-1.25/missing --run autoconf"
-S["ACLOCAL"]="${SHELL} /home/pablo/bcm2835-1.25/missing --run aclocal-1.12"
+S["install_sh"]="${SHELL} /home/pi/Desktop/HumTemp/bcm2835-1.25/install-sh"
+S["MAKEINFO"]="${SHELL} /home/pi/Desktop/HumTemp/bcm2835-1.25/missing --run makeinfo"
+S["AUTOHEADER"]="${SHELL} /home/pi/Desktop/HumTemp/bcm2835-1.25/missing --run autoheader"
+S["AUTOMAKE"]="${SHELL} /home/pi/Desktop/HumTemp/bcm2835-1.25/missing --run automake-1.12"
+S["AUTOCONF"]="${SHELL} /home/pi/Desktop/HumTemp/bcm2835-1.25/missing --run autoconf"
+S["ACLOCAL"]="${SHELL} /home/pi/Desktop/HumTemp/bcm2835-1.25/missing --run aclocal-1.12"
 S["VERSION"]="1.25"
 S["PACKAGE"]="bcm2835"
 S["CYGPATH_W"]="echo"
