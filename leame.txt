@@ -1,4 +1,8 @@
-Istrucciones de instalación:
+Instrucciones para usar el escritorio remoto:
+	1) Se debe instalar el xrdp: sudo apt-get install xrdp
+	2) Configurar el escritorio remoto con el ip del rasp
+
+Instrucciones de instalación:
 	1) Instalar PostgreSQL: sudo apt-get install postgresql
 	2) Comprobar que el motor de la base esta corriendo: service postgresql status
 	   Debería retorar algo similar a: 
@@ -16,8 +20,8 @@ Istrucciones de instalación:
 		sudo -u postgresql createdb testdb -O pi
 	5) Crear la tabla de registros y control para la app:
 		-psql testdb (Abre la base de datos)
-		-CREATE TABLE register (id INT PRIMARY KEY, name VARCHAR, gpio INTEGER, date TIMESTAMP, temp INTEGER, hum INTEGER); (Crea la tabla register)
-		-CREATE TABLE control (id INT PRIMARY KEY, name VARCHAR, ciclo INTEGER, veces INTEGER, status INTEGER); (Crea la tabla de cotrol)
+		-CREATE TABLE register (id INT PRIMARY KEY, name VARCHAR, gpio INTEGER, date TIMESTAMP, temp FLOAT, hum FLOAT); (Crea la tabla register)
+		-CREATE TABLE control (id INT PRIMARY KEY, name VARCHAR, ciclo INTEGER, veces INTEGER, status INTEGER, sensor INTEGER); (Crea la tabla de cotrol)
 		-\q (Cierra la base)
 	6) Dar los permisos a root para que pueda insertar/modificar datos:
 		-psql testdb (Abre la base de datos)

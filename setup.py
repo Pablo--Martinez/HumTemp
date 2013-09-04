@@ -5,6 +5,10 @@ Modulo encargado de preparar el sistema para poder realizar las mediciones
 """
 import subprocess
 
+print("Configurando escritorio remoto...")
+subprocess.call(["sudo","apt-get","install","xrdp"])
+print("Configuracion completada!")
+
 print("Instalando PostgreSQL...")
 subprocess.call(["sudo","apt-get","install","postgresql"])
 print("Instalacion completada!")
