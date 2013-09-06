@@ -28,7 +28,14 @@ Istrucciones de instalación:
 		-GRANT ALL ON TABLE register TO root; (Otorga los permisos a root sobre register)
 		-GRANT ALL ON TABLE control TO root; (Otorga los permisos a root sobre control)
 		-\q (Salir de la base de datos)
-	
+	7) Instalar la libreria BCM2835:(Debe estar en el mismo directorio)
+		-cd bcm2835-1.25
+		-./configure
+		-make
+		-sudo meke install
+	8) En caso de ser necesario, recompilar Adafruit_DHT2:
+		-gcc Adafruit_DHT.c -l bcm2835 -std=gnu99 -o Adafruit_DHT2
+
 	LISTO!
 	
 	OBS: Es necesario que PostgreSQL.py, Adafruit_DHT2 se encuentre en la misma carpeta que
