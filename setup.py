@@ -5,6 +5,10 @@ Modulo encargado de preparar el sistema para poder realizar las mediciones
 """
 import subprocess
 
+print("Configurando escritorio remoto...")
+subprocess.call(["sudo","apt-get","install","xrdp"])
+print("Configuracion completada!")
+
 print("Instalando PostgreSQL...")
 subprocess.call(["sudo","apt-get","install","postgresql"])
 print("Instalacion completada!")
@@ -30,8 +34,8 @@ print("Conexion realizada!")
 
 print("Creando nuevas tablas...")
 db.CreateTable("register",["name VARCHAR","gpio INTEGER","date TIMESTAMP","temp FLOAT","hum FLOAT"])
-db.CreateTable("control",["name VARCHAR","ciclo INTEGER","veces INTEGER","status INTEGER","sensor INTEGER"])
-db.InsertRegisterInTable("control",["name",0,0,0,22])
+db.CreateTable("control",["name VARCHAR","ciclo INTEGER","veces INTEGER","status INTEGER","sensor INTEGER","gpio4 INTEGER","gpio17 INTEGER","gpio18 INTEGER","gpio22 INTEGER","gpio23 INTEGER","gpio24 INTEGER","gpio25 INTEGER","gpio27 INTEGER"])
+db.InsertRegisterInTable("control",["name",0,0,0,22,0,0,0,0,0,0,0,0])
 print("Tablas creadas!")
 
 print("Otorgando permisos...")
@@ -48,9 +52,3 @@ subprocess.call(["sudo","apt-get","install","python-gtk2"])
 print("Instalacion completada!")
 
 print("Proceso finalizado!")
-
-
-
-
-
-

@@ -7,6 +7,7 @@ import gtk
 import os
 import subprocess
 import sys
+from time import sleep
 
 ctr = "control"
 separador = ";"
@@ -15,45 +16,47 @@ errores = ["Ya existe sesion activa","Debe terminar la sesion activa para bajar 
 			"No existe sesion activa actualmente","No es posible bajar datos de sesion actual"]
 
 def IniciarCensado(nombre,ciclo,sensor,terminal):
-		"""
-		Inicia el ciclo de sensado, los datos son almacenados cada "ciclo" minutos
-		bajo el nombre de "nombre", se asume que no esta censando actualmente
-		"""
-		if (Estado() == 0):
-			db = PostgreSQL.PostgreSQL("testdb","pi")
-			try: #Intento modificar control a la db
-				db.UpdateRegisterInTable(ctr,["id",1],["name",nombre])
-				db.UpdateRegisterInTable(ctr,["id",1],["ciclo",ciclo-1])
-				db.UpdateRegisterInTable(ctr,["id",1],["veces",0])
-				db.UpdateRegisterInTable(ctr,["id",1],["status",1])
-				if (sensor == "DHT11"):
-					db.UpdateRegisterInTable(ctr,["id",1],["sensor",11])
-				else:
-					db.UpdateRegisterInTable(ctr,["id",1],["sensor",22])
-			except: #No existe control
-				db.CreateTable(ctr,["name VARCHAR","ciclo INTEGER","veces INTEGER","status INTEGER","sensor INTEGER"])
-				db.InsertRegisterInTable(ctr,[nombre,ciclo-1,0,1,11])
-				db.UpdateRegisterInTable(ctr,["id",1],["name",nombre])
-				db.UpdateRegisterInTable(ctr,["id",1],["ciclo",ciclo-1])
-				db.UpdateRegisterInTable(ctr,["id",1],["veces",0])
-				db.UpdateRegisterInTable(ctr,["id",1],["status",1])
-				if (sensor == "DHT11"):
-					db.UpdateRegisterInTable(ctr,["id",1],["sensor",11])
-				else:
-					db.UpdateRegisterInTable(ctr,["id",1],["sensor",22])
-			db.CloseDB()
-			
-			if (not terminal):
-				GUI_Mensaje("%s: Sesion iniciada"%(Nombre()))
-				gtk.main_quit()
-				GUI_app()
-			else:
-				print("%s: Sesion iniciada"%(Nombre()))
+	"""
+	Inicia el ciclo de sensado, los datos son almacenados cada "ciclo" minutos
+	bajo el nombre de "nombre", se asume que no esta censando actualmente
+	"""
+	if (Estado() == 0):
+		db = PostgreSQL.PostgreSQL("testdb","pi")
+		db.UpdateRegisterInTable(ctr,["id",1],["name",nombre])
+		db.UpdateRegisterInTable(ctr,["id",1],["ciclo",ciclo-1])
+		db.UpdateRegisterInTable(ctr,["id",1],["veces",0])
+		db.UpdateRegisterInTable(ctr,["id",1],["status",1])
+		if (sensor == "DHT11"):
+			db.UpdateRegisterInTable(ctr,["id",1],["sensor",11])
 		else:
-			if (not terminal):
-				GUI_Mensaje(errores[0])
+			db.UpdateRegisterInTable(ctr,["id",1],["sensor",22])
+		for i in range(len(pines)):
+                	intentos = 0
+			MAX_INTENTOS = 3
+			salida = subprocess.Popen(["sudo","/home/pi/Desktop/Python/Adafruit_DHT2",str(Sensor()),pines[i]],stdout=subprocess.PIPE).communicate()[0]
+                	while (salida == "" and intentos <= MAX_INTENTOS): #Intento tomar la medida
+                        	sleep(1)
+                               	salida = subprocess.Popen(["sudo","/home/pi/Desktop/Python/Adafruit_DHT2",str(Sensor()),pines[i]],stdout=subprocess.PIPE).communicate()[0]
+                               	intentos += +1
+               		if (intentos <= MAX_INTENTOS):#Hay sensor
+				db.UpdateRegisterInTable(ctr,["id",1],["gpio"+pines[i],1])
 			else:
-				print(errores[0])
+				db.UpdateRegisterInTable(ctr,["id",1],["gpio"+pines[i],0])
+                       	sleep(1)
+                       	intentos = 0
+			
+		db.CloseDB()
+		if (not terminal):
+			GUI_Mensaje("%s: Sesion iniciada"%(Nombre()))
+			gtk.main_quit()
+			GUI_app()
+		else:
+			print("%s: Sesion iniciada"%(Nombre()))
+	else:
+		if (not terminal):
+			GUI_Mensaje(errores[0])
+		else:
+			print(errores[0])
 				
 def TerminarCensado(terminal):
 	"""
@@ -144,6 +147,20 @@ def Sensor():
 	db.CloseDB()
 	return row[0][5]
 
+def SensoresActivos():
+	"""
+	Retorna una lista con los sensores, activos y desactivos
+	"""
+	db = PostgreSQL.PostgreSQL("testdb","pi")
+	row = db.SelectFromTable(ctr,["id",1])
+	db.CloseDB()
+	sensores = []
+	for i in range(6,len(row[0])):
+		sensores.append(row[0][i])
+	#print sensores
+	return sensores
+	#return row[0][6:len(row) - 1]
+
 class GUI_Mensaje():
 	def __init__(self,texto):
 		error = gtk.MessageDialog(parent=None, flags=0, buttons=gtk.BUTTONS_OK)
@@ -210,12 +227,20 @@ class GUI_app():
 			boton_inicio.connect("clicked",lambda a:IniciarCensado("","","",0))
 			boton_detener.connect("clicked",lambda a:TerminarCensado(0))
 			boton_bajar.connect("clicked",lambda a:BajarDatos(entry_bajar.get_text(),0))
+			"""
 			for i in range(8):
 				if (subprocess.Popen(["sudo","/home/pi/Desktop/Python/Adafruit_DHT2",str(Sensor()),pines[i]],stdout=subprocess.PIPE).communicate()[0] != ""):
 					labels_gpios[i][1].set_text("OK")
 				else:
 					labels_gpios[i][1].set_text("-")
-			
+			"""
+			sensores = SensoresActivos()
+			for i in range(8):
+				if (sensores[i] == 1):
+					labels_gpios[i][1].set_text("OK")
+				else:
+					labels_gpios[i][1].set_text("-")
+				
 		else: #No esta midiendo
 			valor_estado = gtk.Label()
 			valor_estado.set_markup('<span color="red">SIN CENSAR</span>');
