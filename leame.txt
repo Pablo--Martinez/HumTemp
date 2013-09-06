@@ -20,8 +20,10 @@ Istrucciones de instalación:
 		sudo -u postgresql createdb testdb -O pi
 	5) Crear la tabla de registros y control para la app:
 		-psql testdb (Abre la base de datos)
-		-CREATE TABLE register (id INT PRIMARY KEY, name VARCHAR, gpio INTEGER, date TIMESTAMP, temp INTEGER, hum INTEGER); (Crea la tabla register)
+		- CREATE TABLE register (id INT PRIMARY KEY, name VARCHAR, gpio INTEGER, date TIMESTAMP, temp INTEGER, hum INTEGER); (Crea la tabla register)
 		-CREATE TABLE control (id INT PRIMARY KEY, name VARCHAR, ciclo INTEGER, veces INTEGER, status INTEGER, sensor INTEGER, gpio4 INTEGER, gpio17 INTEGER, gpio18 INTEGER, gpio22 INTEGER, gpio23 INTEGER, gpio24 INTEGER, gpio25 INTEGER, gpio27 INTEGER); (Crea la tabla de cotrol)
+		-CREATE TABLE register (id INT PRIMARY KEY, name VARCHAR, gpio INTEGER, date TIMESTAMP, temp FLOAT, hum FLOAT); (Crea la tabla register)
+		-CREATE TABLE control (id INT PRIMARY KEY, name VARCHAR, ciclo INTEGER, veces INTEGER, status INTEGER, sensor INTEGER); (Crea la tabla de cotrol)
 		-\q (Cierra la base)
 	6) Dar los permisos a root para que pueda insertar/modificar datos:
 		-psql testdb (Abre la base de datos)
