@@ -15,7 +15,7 @@ pines = ["4","17","18","22","23","24","25","27"]
 errores = ["Ya existe sesion activa","Debe terminar la sesion activa para bajar datos",
 			"No existe sesion activa actualmente","No es posible bajar datos de sesion actual"]
 
-def IniciarCensado(nombre,ciclo,sensor,terminal):
+def IniciarCensado(gui,nombre,ciclo,sensor,terminal):
 	"""
 	Inicia el ciclo de sensado, los datos son almacenados cada "ciclo" minutos
 	bajo el nombre de "nombre", se asume que no esta censando actualmente
@@ -48,8 +48,20 @@ def IniciarCensado(nombre,ciclo,sensor,terminal):
 		db.CloseDB()
 		if (not terminal):
 			GUI_Mensaje("%s: Sesion iniciada"%(Nombre()))
-			gtk.main_quit()
-			GUI_app()
+			gui.valor_estado.set_markup('<span color="green">CENSANDO</span>')
+			gui.entry_nombre.set_text(Nombre())
+			gui.entry_nombre.set_sensitive(False)
+			gui.entry_ciclo.set_text(str(ciclo))
+			gui.entry_ciclo.set_sensitive(False)
+			gui.menu.set_sensitive(False)
+			gui.menu.set_sensitive(False)
+			sensores = SensoresActivos()
+                        for i in range(8):
+                                if (sensores[i] == 1):
+                                        gui.labels_gpios[i][1].set_text("OK")
+                                else:
+                                        gui.labels_gpios[i][1].set_text("-")
+
 		else:
 			print("%s: Sesion iniciada"%(Nombre()))
 	else:
@@ -58,7 +70,7 @@ def IniciarCensado(nombre,ciclo,sensor,terminal):
 		else:
 			print(errores[0])
 				
-def TerminarCensado(terminal):
+def TerminarCensado(gui,terminal):
 	"""
 	Cancela el censado actual, asume que actualmente se esta censando
 	"""
@@ -67,8 +79,17 @@ def TerminarCensado(terminal):
 		db.UpdateRegisterInTable(ctr,["id",1],["status",0])
 		if (not terminal):
 			GUI_Mensaje("%s: Sesion terminada"%(Nombre()))
-			gtk.main_quit()
-			GUI_app()
+			gui.valor_estado.set_markup('<span color="red">SIN CENSAR</span>')
+			gui.entry_nombre.set_sensitive(True)
+                        gui.entry_nombre.set_text("Ingrese el nombre para ser guardaro..")
+			gui.entry_ciclo.set_sensitive(True)
+                        gui.entry_ciclo.set_text("Tiempo en minutos entre medidas...")
+                        #Menu desplegable para selecionar el sensor
+                        opciones = ["DHT11","DHT22"]
+                        gui.menu.set_popdown_strings(opciones)
+			gui.menu.set_sensitive(True)
+			for i in range(8):
+                                gui.labels_gpios[i][1].set_text("-")		
 		else:
 			print("%s: Sesion terminada"%(Nombre()))
 	else:
@@ -157,10 +178,8 @@ def SensoresActivos():
 	sensores = []
 	for i in range(6,len(row[0])):
 		sensores.append(row[0][i])
-	#print sensores
 	return sensores
-	#return row[0][6:len(row) - 1]
-
+	
 class GUI_Mensaje():
 	def __init__(self,texto):
 		error = gtk.MessageDialog(parent=None, flags=0, buttons=gtk.BUTTONS_OK)
@@ -190,13 +209,14 @@ class GUI_app():
 		hbox_valores1 = gtk.HBox()
 		hbox_valores2 = gtk.HBox()
 		vbox_gpios = []
-		labels_gpios = []
+		#Labels que contendran si un sensor esta presente o no
+		self.labels_gpios = []
 		for i in range(8):
-			labels_gpios.append([gtk.Label(),gtk.Label()])
+			self.labels_gpios.append([gtk.Label(),gtk.Label()])
 			vbox_gpios.append(gtk.VBox())
-			labels_gpios[i][0].set_text("GPIO"+pines[i])
-			vbox_gpios[i].pack_start(labels_gpios[i][0])
-			vbox_gpios[i].pack_start(labels_gpios[i][1])
+			self.labels_gpios[i][0].set_text("GPIO"+pines[i])
+			vbox_gpios[i].pack_start(self.labels_gpios[i][0])
+			vbox_gpios[i].pack_start(self.labels_gpios[i][1])
 			if (i < 4):
 				hbox_valores1.pack_start(vbox_gpios[i])
 			else:
@@ -204,7 +224,8 @@ class GUI_app():
 		
 		hbox_botones = gtk.HBox()
 		hbox_salir = gtk.HBox()
-	
+		
+		#Labels, entradas de texto y botones principales
 		label_estado = gtk.Label("Estado")
 		boton_inicio = gtk.Button("INICIAR")
 		boton_detener = gtk.Button("DETENER")
@@ -217,47 +238,48 @@ class GUI_app():
 		label_bajar = gtk.Label("Datos a bajar:")
 		entry_bajar = gtk.Entry()
 		entry_bajar.set_text("Nombre de sesion a bajar...")
-		
+		self.valor_estado = gtk.Label()
+		self.entry_nombre = gtk.Entry()
+		self.entry_ciclo = gtk.Entry()
+		self.menu = gtk.Combo()
+		opciones = ["DHT11","DHT22"]
+                self.menu.set_popdown_strings(opciones)
+
 		if (Estado() == 1): #Actualmente midiendo
-			valor_estado = gtk.Label()
-			valor_estado.set_markup('<span color="green">CENSANDO</span>')
-			entry_nombre = gtk.Label(Nombre())
-			entry_ciclo = gtk.Label(Ciclo())
-			menu = gtk.Label("DHT" + str(Sensor()))
-			boton_inicio.connect("clicked",lambda a:IniciarCensado("","","",0))
-			boton_detener.connect("clicked",lambda a:TerminarCensado(0))
+			self.valor_estado.set_markup('<span color="green">CENSANDO</span>')
+			self.entry_nombre.set_text(Nombre())
+			self.entry_nombre.set_sensitive(False)
+			self.entry_ciclo.set_text(str(Ciclo()))
+			self.entry_ciclo.set_sensitive(False)
+			if (Sensor() == 11):
+				opciones = ["DHT11","DHT22"]
+                   	else:
+				opciones = ["DHT22","DHT11"]
+			self.menu.set_popdown_strings(opciones)
+			self.menu.set_sensitive(False)
+			boton_inicio.connect("clicked",lambda a:IniciarCensado(self,"","","",0))
+			boton_detener.connect("clicked",lambda a:TerminarCensado(self,0))
 			boton_bajar.connect("clicked",lambda a:BajarDatos(entry_bajar.get_text(),0))
-			"""
-			for i in range(8):
-				if (subprocess.Popen(["sudo","/home/pi/Desktop/Python/Adafruit_DHT2",str(Sensor()),pines[i]],stdout=subprocess.PIPE).communicate()[0] != ""):
-					labels_gpios[i][1].set_text("OK")
-				else:
-					labels_gpios[i][1].set_text("-")
-			"""
 			sensores = SensoresActivos()
 			for i in range(8):
 				if (sensores[i] == 1):
-					labels_gpios[i][1].set_text("OK")
+					self.labels_gpios[i][1].set_text("OK")
 				else:
-					labels_gpios[i][1].set_text("-")
+					self.labels_gpios[i][1].set_text("-")
 				
 		else: #No esta midiendo
-			valor_estado = gtk.Label()
-			valor_estado.set_markup('<span color="red">SIN CENSAR</span>');
-			entry_nombre = gtk.Entry()
-			entry_ciclo = gtk.Entry()
-			entry_nombre.set_text("Ingrese el nombre para ser guardaro..")
-			entry_ciclo.set_text("Tiempo en minutos entre medidas...")
+			self.valor_estado.set_markup('<span color="red">SIN CENSAR</span>');
+			self.entry_nombre.set_text("Ingrese el nombre para ser guardaro..")
+			self.entry_ciclo.set_text("Tiempo en minutos entre medidas...")
 			#Menu desplegable para selecionar el sensor
-			menu = gtk.Combo()
 			opciones = ["DHT11","DHT22"]
-			menu.set_popdown_strings(opciones)
+			self.menu.set_popdown_strings(opciones)
 			#Establezco la conexion entre botones y funciones
-			boton_inicio.connect('clicked',lambda a:IniciarCensado(entry_nombre.get_text(),int(entry_ciclo.get_text()),menu.entry.get_text(),0))
-			boton_detener.connect("clicked",lambda a:TerminarCensado(0))
+			boton_inicio.connect('clicked',lambda a:IniciarCensado(self,self.entry_nombre.get_text(),int(self.entry_ciclo.get_text()),self.menu.entry.get_text(),0))
+			boton_detener.connect("clicked",lambda a:TerminarCensado(self,0))
 			boton_bajar.connect('clicked',lambda a:BajarDatos(entry_bajar.get_text(),0))
 			for i in range(8):
-				labels_gpios[i][1].set_text("-")
+				self.labels_gpios[i][1].set_text("-")
 				
 		#Empaqueto los botones,labels y entradas en los boxes
 		vbox1.pack_start(label_estado)
@@ -265,10 +287,10 @@ class GUI_app():
 		vbox1.pack_start(label_ciclo)
 		vbox1.pack_start(label_menu)
 		
-		vbox2.pack_start(valor_estado)
-		vbox2.pack_start(entry_nombre)
-		vbox2.pack_start(entry_ciclo)
-		vbox2.pack_start(menu)
+		vbox2.pack_start(self.valor_estado)
+		vbox2.pack_start(self.entry_nombre)
+		vbox2.pack_start(self.entry_ciclo)
+		vbox2.pack_start(self.menu)
 		
 		hbox_bajar = gtk.HBox()
 		hbox_bajar.pack_start(label_bajar)
@@ -355,3 +377,4 @@ if __name__ == "__main__":
 			Terminal()
 	else:
 		GUI_app()
+
