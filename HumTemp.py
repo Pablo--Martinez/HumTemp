@@ -6,7 +6,7 @@ import PostgreSQL
 import os
 from time import sleep
 
-pins = ["4","17","18","21","22","23","24","25"]
+pins = ["4","17","18","27","22","23","24","25"]
 MAX_INTENTOS = 3
 intentos = 0
 
