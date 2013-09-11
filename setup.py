@@ -19,12 +19,12 @@ subprocess.call(["sudo","apt-get","install","python-psycopg2"])
 print("Motor iniciado!")
 
 print("Creando nuevo usuario...")
-subprocess.call(["sudo","-u","postgresql","createuser","pi"])#Se deben insertar las opciones adecuadas
-subprocess.call(["sudo","-u","postgresql","createuser","root"])
+subprocess.call(["sudo","-u","postgres","createuser","pi"])#Se deben insertar las opciones adecuadas
+subprocess.call(["sudo","-u","postgres","createuser","root"])
 print("Nuevo usuario creado!")
 
 print("Creando nueva base de datos...")
-subprocess.call(["sudo","-u","postgresql","createdb","testdb","-O","pi"])
+subprocess.call(["sudo","-u","postgres","createdb","testdb","-O","pi"])
 print("Base de datos creada!")
 
 print("Conectando con base de datos...")
