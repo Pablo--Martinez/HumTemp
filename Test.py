@@ -10,14 +10,14 @@ from time import sleep
 from datetime import datetime
 
 status = ["OK","No_Presente"]
-pins = ["4","17","18","21","22","23","24","25"]
+pins = ["4","17","18","27","22","23","24","25"]
 values = []
 MAX_VECES = 3
 veces = 0;
 
 try: #Intento correr el script
         if (len(sys.argv) >= 2): #Encuentro el argumento del sensor
-                print(datetime.now())
+                
 		for i in range(len(pins)):
 			salida = subprocess.Popen(["sudo","./Adafruit_DHT2",sys.argv[1],pins[i]],stdout=subprocess.PIPE).communicate()[0]
                         #values.append(salida)
@@ -33,7 +33,7 @@ try: #Intento correr el script
                                 print("GPIO_%s --> STATUS: \033[1;31m%s\033[1;m"%(pins[i],status[1]))
         		sleep(1)
 			veces = 0
-		print(datetime.now())
+		
 	else: #Falta argumento del sensor
                 print("Tipo de sensor faltante, ejecute: sudo ./Test.py sensor")
 except: #No se corrio con privilegios de root
