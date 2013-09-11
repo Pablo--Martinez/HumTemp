@@ -35,7 +35,12 @@ Istrucciones de instalaci√≥n:
 		-sudo meke install
 	8) En caso de ser necesario, recompilar Adafruit_DHT2:
 		-gcc Adafruit_DHT.c -l bcm2835 -std=gnu99 -o Adafruit_DHT2
-
+	9) Agregar en el crontab del root la funci√on HumTemp.py:
+		-sudo crontab -e (Abre una ventana de texto)
+		-Al final del archivo agregar:
+			*/1 * * * * /home/pi/Desktop/Python/HumTemp.py
+		-Guardar usando crtl+o
+		
 	LISTO!
 	
 	OBS: Es necesario que PostgreSQL.py, Adafruit_DHT2 se encuentre en la misma carpeta que
