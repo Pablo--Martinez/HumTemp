@@ -2,7 +2,7 @@ Instrucciones para usar el escritorio remoto:
 	1) Se debe instalar el xrdp: sudo apt-get install xrdp
 	2) Configurar el escritorio remoto con el ip del rasp
 
-Istrucciones de instalaci√≥n:
+Istrucciones de instalaciÛn:
 	1) Instalar PostgreSQL: sudo apt-get install postgresql
 	2) Comprobar que el motor de la base esta corriendo: service postgresql status
 	   Deber√≠a retorar algo similar a: 
@@ -40,6 +40,8 @@ Istrucciones de instalaci√≥n:
 		-Al final del archivo agregar:
 			*/1 * * * * /home/pi/Desktop/Python/HumTemp.py
 		-Guardar usando crtl+o
+	10) Instalar matpyplot para poder usar la funciÛn de ploteo:
+		-sudo apt-get install python-matplotlib
 		
 	LISTO!
 	
