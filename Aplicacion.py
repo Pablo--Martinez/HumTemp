@@ -108,7 +108,7 @@ def BajarDatos(nombre,terminal):
 		row = db.SelectFromTable(ctr,["id",1])
 		rows = db.SelectFromTable("register",["name",nombre])
 		if (len(rows) > 0):
-			f = open(nombre + "_datos.txt","w")
+			f = open("/home/pi/Desktop/Python/" + nombre + "_datos.txt","w")
 			for elem in rows:
 				line = elem[1] + separador + str(elem[2]) + separador + str(elem[3]) + separador + str(elem[4]) + separador + str(elem[5])
 				f.write(line + "\n")
