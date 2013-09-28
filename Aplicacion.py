@@ -328,7 +328,7 @@ class Terminal():
 				if (len(comando) >= 4): #Cantidad de comandos correctos
 					if (Estado() == 0): #No se esta censando acutalmente
 						if (type(comando[2] == "int")): #El ciclo es un numero
-							IniciarCensado(comando[1],int(comando[2]),comando[3],1)
+							IniciarCensado('',comando[1],int(comando[2]),comando[3],1)
 							print("Sesion iniciada...")
 						else:
 							print("ciclo incorrecto...")
@@ -338,7 +338,7 @@ class Terminal():
 					print("Argumentos faltantes...")
 		
 			elif(comando[0] == "terminar"): #Terminar sesion activa
-				TerminarCensado(1)
+				TerminarCensado('',1)
 						
 			elif(comando[0] == "status"): #Imprimo los valores actuales de la sesion si esta activa
 				if (Estado() == 1):
