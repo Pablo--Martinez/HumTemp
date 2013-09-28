@@ -2,7 +2,7 @@ Instrucciones para usar el escritorio remoto:
 	1) Se debe instalar el xrdp: sudo apt-get install xrdp
 	2) Configurar el escritorio remoto con el ip del rasp
 
-Istrucciones de instalación:
+Istrucciones de instalaciÃ³n:
 	1) Instalar PostgreSQL: sudo apt-get install postgresql
 	2) Comprobar que el motor de la base esta corriendo: service postgresql status
 	   DeberÃ­a retorar algo similar a: 
@@ -22,11 +22,13 @@ Istrucciones de instalación:
 		-psql testdb (Abre la base de datos)
 		-CREATE TABLE control (id INT PRIMARY KEY, name VARCHAR, ciclo INTEGER, veces INTEGER, status INTEGER, sensor INTEGER, gpio4 INTEGER, gpio17 INTEGER, gpio18 INTEGER, gpio22 INTEGER, gpio23 INTEGER, gpio24 INTEGER, gpio25 INTEGER, gpio27 INTEGER); (Crea la tabla de cotrol)
 		-CREATE TABLE register (id INT PRIMARY KEY, name VARCHAR, gpio INTEGER, date TIMESTAMP, temp FLOAT, hum FLOAT); (Crea la tabla register)
+		-CREATE TABLE register_temp(id INT PRIMARY KEY, name VARCHAR, date TIMESTAMP, sensor INTEGER, temp FLOAT);
 		-\q (Cierra la base)
 	6) Dar los permisos a root para que pueda insertar/modificar datos:
 		-psql testdb (Abre la base de datos)
 		-GRANT ALL ON TABLE register TO root; (Otorga los permisos a root sobre register)
 		-GRANT ALL ON TABLE control TO root; (Otorga los permisos a root sobre control)
+		-GRANT ALL ON TABLE register_temp TO root;
 		-\q (Salir de la base de datos)
 	7) Instalar la libreria BCM2835:(Debe estar en el mismo directorio)
 		-cd bcm2835-1.25
@@ -40,8 +42,6 @@ Istrucciones de instalación:
 		-Al final del archivo agregar:
 			*/1 * * * * /home/pi/Desktop/Python/HumTemp.py
 		-Guardar usando crtl+o
-	10) Instalar matpyplot para poder usar la función de ploteo:
-		-sudo apt-get install python-matplotlib
 		
 	LISTO!
 	
