@@ -21,7 +21,7 @@ def IniciarCensado(gui,nombre,ciclo,sensor,terminal):
 	bajo el nombre de "nombre", se asume que no esta censando actualmente
 	"""
 	if (Estado() == 0):
-		db = PostgreSQL.PostgreSQL("testdb","pi")
+		db = PostgreSQL.PostgreSQL(namedb="testdb",username="pi")
 		db.UpdateRegisterInTable(ctr,["id",1],["name",nombre])
 		db.UpdateRegisterInTable(ctr,["id",1],["ciclo",ciclo-1])
 		db.UpdateRegisterInTable(ctr,["id",1],["veces",0])
@@ -74,7 +74,7 @@ def TerminarCensado(gui,terminal):
 	"""
 	Cancela el censado actual, asume que actualmente se esta censando
 	"""
-	db = PostgreSQL.PostgreSQL("testdb","pi")
+	db = PostgreSQL.PostgreSQL(namedb="testdb",username="pi")
 	if (Estado() == 1):
 		db.UpdateRegisterInTable(ctr,["id",1],["status",0])
 		if (not terminal):
@@ -104,7 +104,7 @@ def BajarDatos(nombre,terminal):
 	Baja los datos de la sesion con nombre pasado como parametro
 	"""
 	if (Nombre() != nombre or Estado() == 0):
-		db = PostgreSQL.PostgreSQL("testdb","pi")
+		db = PostgreSQL.PostgreSQL(namedb="testdb",username="pi")
 		row = db.SelectFromTable(ctr,["id",1])
 		rows = db.SelectFromTable("register",["name",nombre])
 		if (len(rows) > 0):
@@ -133,7 +133,7 @@ def Estado():
 	"""
 	Retorna el estado actual del censado
 	"""
-	db = PostgreSQL.PostgreSQL("testdb","pi")
+	db = PostgreSQL.PostgreSQL(namedb="testdb",username="pi")
 	row = db.SelectFromTable(ctr,["id",1])
 	db.CloseDB()
 	if (row[0][4] == 1):
@@ -145,7 +145,7 @@ def Nombre():
 	"""
 	Retorna el nombre del censado actual
 	"""
-	db = PostgreSQL.PostgreSQL("testdb","pi")
+	db = PostgreSQL.PostgreSQL(namedb="testdb",username="pi")
 	row = db.SelectFromTable(ctr,["id",1])
 	db.CloseDB()
 	return row[0][1]
@@ -154,7 +154,7 @@ def Ciclo():
 	"""
 	Retorna el ciclo del censado actual
 	"""
-	db = PostgreSQL.PostgreSQL("testdb","pi")
+	db = PostgreSQL.PostgreSQL(namedb="testdb",username="pi")
 	row = db.SelectFromTable(ctr,["id",1])
 	db.CloseDB()
 	return row[0][2] + 1
@@ -163,7 +163,7 @@ def Sensor():
 	"""
 	Retorna el tipo de sensor
 	"""
-	db = PostgreSQL.PostgreSQL("testdb","pi")
+	db = PostgreSQL.PostgreSQL(namedb="testdb",username="pi")
 	row = db.SelectFromTable(ctr,["id",1])
 	db.CloseDB()
 	return row[0][5]
@@ -172,7 +172,7 @@ def SensoresActivos():
 	"""
 	Retorna una lista con los sensores, activos y desactivos
 	"""
-	db = PostgreSQL.PostgreSQL("testdb","pi")
+	db = PostgreSQL.PostgreSQL(namedb="testdb",username="pi")
 	row = db.SelectFromTable(ctr,["id",1])
 	db.CloseDB()
 	sensores = []

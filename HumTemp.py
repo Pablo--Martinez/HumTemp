@@ -10,7 +10,7 @@ pins = ["4","17","18","27","22","23","24","25"]
 MAX_INTENTOS = 3
 intentos = 0
 
-db = PostgreSQL.PostgreSQL("testdb","root")#Inicio motor de busqueda
+db = PostgreSQL.PostgreSQL(namedb="testdb",username="root")#Inicio motor de busqueda
 status = db.SelectFromTable("control",["id","1"])#Busco el estado de la app
 if status[0][4] == 1:#Esta corriendo
         if (status[0][3] == status[0][2]):#Realizo medicion
