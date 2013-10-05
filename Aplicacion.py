@@ -63,14 +63,6 @@ def IniciarCensado(gui,nombre,ciclo,sensor,terminal):
 			
 		db.CloseDB()
 		if (not terminal):
-			#GUI_Mensaje("%s: Sesion iniciada"%(Nombre()))
-			#gui.valor_estado.set_markup('<span color="green">CENSANDO</span>')
-			#gui.glade.get_object("").set_text(Nombre())
-			#gui.entry_nombre.set_sensitive(False)
-			#gui.entry_ciclo.set_text(str(ciclo))
-			#gui.entry_ciclo.set_sensitive(False)
-			#gui.menu.set_sensitive(False)
-			#gui.menu.set_sensitive(False)
 			sensores = SensoresActivos()
 			gui.glade.get_object("label23").set_markup('<span color="green">%i</span>'%(sensores[1]))
 			if (sensores[0] == 1):
@@ -122,20 +114,6 @@ def TerminarCensado(gui,terminal):
 	if (Estado() == 1):
 		db.UpdateRegisterInTable(ctr,["id",1],["status",0])
 		if (not terminal):
-			#GUI_Mensaje("%s: Sesion terminada"%(Nombre()))
-			#gui.valor_estado.set_markup('<span color="red">SIN CENSAR</span>')
-			#gui.entry_nombre.set_sensitive(True)
-			#gui.entry_nombre.set_text("Ingrese el nombre para ser guardaro..")
-			#gui.entry_ciclo.set_sensitive(True)
-			#gui.entry_ciclo.set_text("Tiempo en minutos entre medidas...")
-			#Menu desplegable para selecionar el sensor
-			#listaelementos=gtk.ListStore(str)
-			#listaelementos.append(["DHT22"])
-			#listaelementos.append(["DHT11"])
-			#gui.glade.get_object("combobox1").set_model(listaelementos)
-			#render = gtk.CellRendererText()
-			#gui.glade.get_object("combobox1").pack_start(render, True)
-			#gui.glade.get_object("combobox1").add_attribute(render, 'text', 0)
 			gui.glade.get_object("label23").set_markup('<span color="red">-</span>')
 			GUI_Mensaje("%s: Sesion terminada"%(Nombre()))
 					
@@ -279,14 +257,6 @@ class App():
 		self.glade.get_object("window1").set_title("BioGuard")
 		self.glade.get_object("window1").connect("delete-event", gtk.main_quit)
 
-		#listaelementos=gtk.ListStore(str)
-		#listaelementos.append(["DHT22"])
-		#listaelementos.append(["DHT11"])
-		#self.glade.get_object("combobox1").set_model(listaelementos)
-		#render = gtk.CellRendererText()
-		#self.glade.get_object("combobox1").pack_start(render, True)
-		#self.glade.get_object("combobox1").add_attribute(render, 'text', 0)
-
 		self.functions = {"start":self.startButton,
 	                     "stop":self.stopButton,
         	             "download":self.downloadData,
@@ -354,7 +324,6 @@ class App():
 						
 		else:
 			self.glade.get_object("button2").set_sensitive(False)
-			#slef.glade.get_object("button1").set_sensitive(True)
 			self.glade.get_object("label5").set_markup('<span color="red">SIN CENSAR</span>')
 			self.glade.get_object("button1").set_sensitive(True)
 			self.glade.get_object("entry3").set_sensitive(True)
