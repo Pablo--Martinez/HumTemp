@@ -18,7 +18,7 @@ def get_data(name):
 	dates = [[],[],[],[],[],[],[],[]]
 	temps = [[],[],[],[],[],[],[],[]]
 	hums = [[],[],[],[],[],[],[],[]]
-	db = PostgreSQL.PostgreSQL(namedb="testdb",username="pi")
+	db = PostgreSQL.PostgreSQL(namedb="BioGuardDB",username="BioGuard",host='localhost',passw="bioguardpassword")
 	rows = db.SelectFromTable("register",["name",name])
 	db.CloseDB()
 	for row in rows:
