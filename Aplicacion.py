@@ -6,6 +6,7 @@ pygtk.require("2.0")
 import gtk
 import gtk.glade
 import PostgreSQL
+import sys
 from time import sleep
 from Plot import plot
 
@@ -40,7 +41,7 @@ def IniciarCensado(gui,nombre,ciclo,sensor,terminal):
 			f = open("/home/pi/digitemp.conf","r")
 			lines = f.readlines()
 			lines = lines[7:]
-			gui.glade.get_object("label23").set_markup('<span color="green">%i</span>'%(len(lines)))
+			#gui.glade.get_object("label23").set_markup('<span color="green">%i</span>'%(len(lines)))
 			f.close()
 		else:
 			gui.glade.get_object("label23").set_markup('<span color="red">-</span>')
@@ -71,6 +72,7 @@ def IniciarCensado(gui,nombre,ciclo,sensor,terminal):
 			#gui.menu.set_sensitive(False)
 			#gui.menu.set_sensitive(False)
 			sensores = SensoresActivos()
+			gui.glade.get_object("label23").set_markup('<span color="green">%i</span>'%(sensores[1]))
 			if (sensores[0] == 1):
 				gui.glade.get_object("label7").set_markup('<span color="green">OK</span>')
 			else:
@@ -431,7 +433,67 @@ class App():
 	def exit(self,widget):
 		gtk.main_quit()
 
+class Terminal():
+	"""
+	Permite ejecutar la aplicacion en version terminal
+	"""
+	comandos = ["ayuda","iniciar","terminar","bajar","estado","salir"]
+	
+	def __init__(self):
+		comando = raw_input("BIOGUARD $ ").split(" ")
+		while (comando[0] != "salir"):
+			if (comando[0] == "iniciar"): #Inicio de sesion
+				if (len(comando) >= 4): #Cantidad de comandos correctos
+					if (Estado() == 0): #No se esta censando acutalmente
+						if (type(comando[2] == "int")): #El ciclo es un numero
+							IniciarCensado("",comando[1],int(comando[2]),comando[3],1)
+							print("Sesion iniciada...")
+						else:
+							print("ciclo incorrecto...")
+					else:
+						print(errores[0])
+				else:
+					print("Argumentos faltantes...")
+		
+			elif(comando[0] == "terminar"): #Terminar sesion activa
+				TerminarCensado("",1)
+						
+			elif(comando[0] == "estado"): #Imprimo los valores actuales de la sesion si esta activa
+				if (Estado() == 1):
+					print("	-Estado --> Corriendo")
+					print("	-Nombre --> %s" %(Nombre()))
+					print("	-Ciclo --> %i" %(Ciclo()))
+					if (Sensor() == 0):
+						print("	-Sensor --> DHT11")
+					else:
+						print("	-Sensor --> DHT22")
+				else:
+					print("	-Estado --> Detenido")
+					
+			elif(comando[0] == "bajar"): #Bajo los datos de la sesion actual
+				if (len(comando) >= 2):
+					BajarDatos(comando[1],1)
+				else:
+					print("Argumentos faltantes...")
+					
+			elif(comando[0] == "ayuda"): #Imprimo ayuda en pantalla
+				print("	-ayuda --> Menu de ayuda")
+				print("	-iniciar nombre ciclo sensor(DHT11/DHT22) --> Crea una nueva sesion")
+				print("	-terminar --> Termina la sesion actual")
+				print("	-bajar nombre --> Baja los datos de la sesion actual")
+				print("	-estado --> Muestra el estado del sistema ")
+			
+			else:
+				print("Comando desconocido...")
+	
+			comando = raw_input("BIOGUARD $ ").split(" ")
+		sys.exit()
+
 if __name__ == "__main__":
-	gui = App()
-	gtk.main()
+	if (len(sys.argv) >= 2):
+		if (sys.argv[1] == "-t"):
+			Terminal()
+	else:
+		gui = App()
+		gtk.main()
 
