@@ -142,7 +142,7 @@ class PostgreSQL():
 		Retorna todas las filas de la tabla cuyo nombre es 'table_name'
 		"""
 		try:
-			command = "SELECT * FROM " + table_name #Comando para seleccionar
+			command = "SELECT * FROM " + table_name + "ORDER BY id" #Comando para seleccionar
 			self.cursor.execute(command)
 			rows = self.cursor.fetchall()
 			return rows #Retorno un array con todos los registros
@@ -165,7 +165,7 @@ class PostgreSQL():
 			else:
 				consult[1] = str(consult[1])
 				
-			command = "SELECT * FROM " + table_name + " WHERE " + consult[0] + "=" + consult[1]  #Comando se seleccion particular
+			command = "SELECT * FROM " + table_name + " WHERE " + consult[0] + "=" + consult[1] + "ORDER BY id" #Comando se seleccion particular
 			self.cursor.execute(command)
 			rows = self.cursor.fetchall()
 			return rows #Retorno el o los elementos seleccionados
