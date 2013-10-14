@@ -65,35 +65,35 @@ def IniciarCensado(gui,nombre,ciclo,sensor,terminal):
 		if (not terminal):
 			sensores = SensoresActivos()
 			gui.glade.get_object("label23").set_markup('<span color="green">%i</span>'%(sensores[1]))
-			if (sensores[0] == 1):
+			if (sensores[0][0] == 1):
 				gui.glade.get_object("label7").set_markup('<span color="green">OK</span>')
 			else:
 				gui.glade.get_object("label7").set_markup('<span color="red">-</span>')
-			if (sensores[1] == 1):
+			if (sensores[0][1] == 1):
 				gui.glade.get_object("label11").set_markup('<span color="green">OK</span>')
 			else:
 				gui.glade.get_object("label11").set_markup('<span color="red">-</span>')
-			if (sensores[2] == 1):
+			if (sensores[0][2] == 1):
 				gui.glade.get_object("label15").set_markup('<span color="green">OK</span>')
 			else:
 				gui.glade.get_object("label15").set_markup('<span color="red">-</span>')
-			if (sensores[3] == 1):
+			if (sensores[0][3] == 1):
 				gui.glade.get_object("label19").set_markup('<span color="green">OK</span>')
 			else:
 				gui.glade.get_object("label19").set_markup('<span color="red">-</span>')
-			if (sensores[4] == 1):
+			if (sensores[0][4] == 1):
 				gui.glade.get_object("label9").set_markup('<span color="green">OK</span>')
 			else:
 				gui.glade.get_object("label9").set_markup('<span color="red">-</span>')
-			if (sensores[5] == 1):
+			if (sensores[0][5] == 1):
 				gui.glade.get_object("label13").set_markup('<span color="green">OK</span>')
 			else:
 				gui.glade.get_object("label13").set_markup('<span color="red">-</span>')
-			if (sensores[6] == 1):
+			if (sensores[0][6] == 1):
 				gui.glade.get_object("label17").set_markup('<span color="green">OK</span>')
 			else:
 				gui.glade.get_object("label17").set_markup('<span color="red">-</span>')
-			if (sensores[7] == 1):
+			if (sensores[0][7] == 1):
 				gui.glade.get_object("label21").set_markup('<span color="green">OK</span>')
 			else:
 				gui.glade.get_object("label21").set_markup('<span color="red">-</span>')
@@ -115,9 +115,11 @@ def TerminarCensado(gui,terminal):
 		db.UpdateRegisterInTable(ctr,["id",1],["status",0])
 		if (not terminal):
 			gui.glade.get_object("label23").set_markup('<span color="red">-</span>')
+			BajarDatos(Nombre(),0)
 			GUI_Mensaje("%s: Sesion terminada"%(Nombre()))
 					
 		else:
+			BajarDatos(Nombre(),1)
 			print("%s: Sesion terminada"%(Nombre()))
 	else:
 		if (not terminal):
@@ -152,7 +154,7 @@ def BajarDatos(nombre,terminal):
 				f = open("/home/pi/digitemp.conf","r")
 				lineas = f.readlines()
 				lineas = lineas[7:]
-				sensor_roms = open("/home/pi/Desktop/Python/sensores_ROMS.txt","w")
+				sensor_roms = open("/home/pi/Desktop/Python/" + nombre + "_ROMS.txt","w")
 				for i in range(len(lineas)):
 					rom = lineas[i][lineas[i].find("0x"):-2]
 					sensor_roms.write("SENSOR:%i -> ROM:%s\n"%(i,rom))
