@@ -13,7 +13,7 @@ from time import sleep
 
 class PostgreSQL():
 		
-	def __init__(self,namedb="testdb",username="pablo"):
+	def __init__(self,host="localhost",namedb="testdb",username="pablo",passw=""):
 		"""
 		Establece la conexion con la base de datos con nombre "namedb" y
 		el usuario "username" en caso de no existir permite crearla
@@ -21,7 +21,10 @@ class PostgreSQL():
 		self.conexion = None #Parto de la conexion nula
 		
 		try:
-			conexion = psycopg2.connect(database=namedb, user=username) #Conecto con la base de datos 
+			if passw == "":
+				conexion = psycopg2.connect(database=namedb,user=username) #Conecto con la base de datos 
+			else:
+				conexion = psycopg2.connect(host=host,database=namedb,user=username,password=passw) #Conecto con la base de datos 
 			self.conexion = conexion #Relaciono la conexion con el objeto
 			self.cursor = conexion.cursor() #Creo el cursor de la nueva conexion
 			self.name = namedb
@@ -267,3 +270,4 @@ class PostgreSQL():
 	def DeleteDB(self):
 		self.conexion.close()
 		subprocess.call(["dropdb",self.name])
+

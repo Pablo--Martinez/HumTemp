@@ -18,7 +18,7 @@ def get_data(name):
 	dates = [[],[],[],[],[],[],[],[]]
 	temps = [[],[],[],[],[],[],[],[]]
 	hums = [[],[],[],[],[],[],[],[]]
-	db = PostgreSQL.PostgreSQL("testdb","pi")
+	db = PostgreSQL.PostgreSQL(namedb="BioGuardDB",username="BioGuard",host='localhost',passw="bioguardpassword")
 	rows = db.SelectFromTable("register",["name",name])
 	db.CloseDB()
 	for row in rows:
@@ -56,7 +56,6 @@ def get_data(name):
 			hums[7].append(row[5])
 			
 	return dates,temps,hums
-	
 
 def plot(name):
 	"""
@@ -112,3 +111,4 @@ def main():
 	
 if __name__ == "__main__": #Programa principal
 	main()
+
