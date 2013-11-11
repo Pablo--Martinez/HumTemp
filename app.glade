@@ -281,7 +281,7 @@
               <object class="GtkLabel" id="label14">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">GPIO21</property>
+                <property name="label" translatable="yes">GPIO18</property>
               </object>
               <packing>
                 <property name="left_attach">2</property>
