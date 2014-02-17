@@ -2,7 +2,8 @@
 import subprocess
 import datetime
 import sys
-import PostgreSQL
+import psycopg2
+import psycopg2.extras
 import os
 from time import sleep
 
@@ -13,39 +14,51 @@ pins = ["4","17","18","27","22","23","24","25"]
 MAX_INTENTOS = 3
 intentos = 0
 
-db = PostgreSQL.PostgreSQL(namedb="BioGuardDB",username="BioGuard",host='localhost',passw="bioguardpassword")#Inicio motor de busqueda
-status = db.SelectFromTable("control",["id","1"])#Busco el estado de la app
-if status[0][4] == 1:#Esta corriendo
-        if (status[0][3] == status[0][2]):#Realizo medicion
-                db.UpdateRegisterInTable("control",["id",1],["veces",0]) #Actualizo
-                date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M') #Momento de medicion
-                name = status[0][1]
-                sensor = status[0][5]
+db = psycopg2.connect(database="MapeoDB", user="pablo", password="bioguardpassword")
+cursor = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
+cursor.execute("SELECT * FROM control WHERE \"ID\"=1") #Busco el estado de la app
+status = cursor.fetchone()
+
+if status["ESTADO"] == 1:#Esta corriendo
+
+	cursor.execute("SELECT * FROM sesion WHERE \"ID\"=%s",(status["ID_SESION"],))
+	sesion = cursor.fetchone()
+	
+	if (sesion["CICLO"] == sesion["CONT"]):#Realizo medicion
+		cursor.execute("UPDATE sesion SET \"CONT\"=0 WHERE \"ID\"=%s",(status["ID_SESION"],))
+		db.commit()
+		date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M') #Momento de medicion
 		#Leo los sensores 1wire
 		salida = subprocess.Popen(["sudo",USB_ADAPTER,"-a","-s",USB_PATH,"-c",CONF_PATH],stdout=subprocess.PIPE).communicate()[0].split("\n")[2:-1]
 		for i in range(len(salida)):
-			db.InsertRegisterInTable("register_temp",[name,i,date,float(salida[i])])
+			cursor.execute("INSERT INTO registro (\"ID_SESION\",\"TIPO\",\"TEMP\",\"FECHA\") VALUES (%s,%s,%s,%s)",(status["ID_SESION"],"T",float(salida[i]),date))
+			db.commit()
+
 		#Leo los sensores de humedad y temperatura
-                for i in range(len(pins)):
-			salida = subprocess.Popen(["sudo","/home/pi/Desktop/Python/Adafruit_DHT2",str(sensor),pins[i]],stdout=subprocess.PIPE).communicate()[0]
-                        while (salida == "" and intentos <= MAX_INTENTOS): #Intento tomar la medida
-                                sleep(1)
-                                salida = subprocess.Popen(["sudo","/home/pi/Desktop/Python/Adafruit_DHT2",str(sensor),pins[i]],stdout=subprocess.PIPE).communicate()[0]
-                                intentos += +1
+		for i in range(len(pins)):
+			salida = subprocess.Popen(["sudo","/home/pi/Desktop/Python/Adafruit_DHT2","22",pins[i]],stdout=subprocess.PIPE).communicate()[0]
+            while (salida == "" and intentos <= MAX_INTENTOS): #Intento tomar la medida
+				sleep(1)
+				salida = subprocess.Popen(["sudo","/home/pi/Desktop/Python/Adafruit_DHT2","22",pins[i]],stdout=subprocess.PIPE).communicate()[0]
+				intentos += +1
 			
-                        if (intentos <= MAX_INTENTOS):#Hay sensor
- 				temp = float(salida.split(" ")[0])
-                                hum = float(salida.split(" ")[1])
-                                db.InsertRegisterInTable("Register",[name,int(pins[i]),date,temp,hum])
-				db.UpdateRegisterInTable("control",["id",1],["gpio"+pins[i],1])
-                        else:
-				db.UpdateRegisterInTable("control",["id",1],["gpio"+pins[i],0])
+            if (intentos <= MAX_INTENTOS):#Hay sensor
+				temp = float(salida.split(" ")[0])
+				hum = float(salida.split(" ")[1])
+				cursor.execute("INSERT INTO registro (\"ID_SESION\",\"TIPO\",\"SENSOR\",\"TEMP\",\"HUM\",\"FECHA\") VALUES (%s,%s,%s,%s,%s,%s)",(sesion["ID"],"H",int(pins[i]),temp,hum,date))
+				db.commit()
+				cursor.execute("UPDATE sesion SET \"GPIO\"%s=%s WHERE \"id\"=%s",(i+1,1,status["ID_SESION"]))
+				db.commit()
+            else:
+				cursor.execute("UPDATE sesion SET \"GPIO\"%s=%s WHERE \"id\"=%s",(i+1,0,status["ID_SESION"]))
+				db.commit()
+			
 			sleep(1)
-                        intentos = 0
+            intentos = 0
 
 	else:
-        	veces = status[0][3]
-                veces += 1
-                db.UpdateRegisterInTable("control",["id",1],["veces",veces]) #Actualizo
+        cant = sesion["CANT"] + 1
+        cursor.execute("UPDATE sesion SET \"CANT\"=%s WHERE \"ID\"=%s",(CANT,sesion["ID"]))
+		db.commit()
                 
-db.CloseDB()#Cierro la base de datos
+db.close() #Detengo la conexion com la base

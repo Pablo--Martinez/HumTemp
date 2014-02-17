@@ -8,7 +8,8 @@ import pygtk
 pygtk.require('2.0')
 import gtk
 import matplotlib.pyplot as plt
-import PostgreSQL
+import psycopg2
+import psycopg2.extras
 import sys
 
 def get_data(name):
@@ -18,42 +19,48 @@ def get_data(name):
 	dates = [[],[],[],[],[],[],[],[]]
 	temps = [[],[],[],[],[],[],[],[]]
 	hums = [[],[],[],[],[],[],[],[]]
-	db = PostgreSQL.PostgreSQL(namedb="BioGuardDB",username="BioGuard",host='localhost',passw="bioguardpassword")
-	rows = db.SelectFromTable("register",["name",name])
-	db.CloseDB()
+	db = psycopg2.connect(database="MapeoDB", user="pablo", password="bioguardpassword")
+	cursor = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
+	cursor.execute("SELECT \"ID\" FROM sesion WHERE \"NOMBRE\"=%s",(name,))
+	sesion = cursor.fetchone()
+	
+	cursor.execute("SELECT * FROM registro WHERE \"ID_SESION\"=%s AND \"TIPO\"=\"H\" ORDER BY \"ID\"",(sesion["ID"],))
+	rows = cursor.fetchall()
+	db.close()
+	
 	for row in rows:
-		if (row[2] == 4):
-			dates[0].append(row[3])
-			temps[0].append(row[4])
-			hums[0].append(row[5])
-		elif (row[2] == 17):
-			dates[1].append(row[3])
-			temps[1].append(row[4])
-			hums[1].append(row[5])
-		elif (row[2] == 18):
-			dates[2].append(row[3])
-			temps[2].append(row[4])
-			hums[2].append(row[5])
-		elif (row[3] == 22):
-			dates[3].append(row[3])
-			temps[3].append(row[4])
-			hums[3].append(row[5])
-		elif (row[2] == 23):
-			dates[4].append(row[3])
-			temps[4].append(row[4])
-			hums[4].append(row[5])
-		elif (row[2] == 24):
-			dates[5].append(row[3])
-			temps[5].append(row[4])
-			hums[5].append(row[5])
-		elif (row[2] == 25):
-			dates[6].append(row[3])
-			temps[6].append(row[4])
-			hums[6].append(row[5])
-		elif (row[2] == 27):
-			dates[7].append(row[3])
-			temps[7].append(row[4])
-			hums[7].append(row[5])
+		if (row["SENSOR"] == 4):
+			dates[0].append(row["FECHA"])
+			temps[0].append(row["TEMP"])
+			hums[0].append(row["HUM"])
+		elif (row["SENSOR"] == 17):
+			dates[1].append(row["FECHA"])
+			temps[1].append(row["TEMP"])
+			hums[1].append(row["hum"])
+		elif (row["SENSOR"] == 18):
+			dates[2].append(row["FECHA"])
+			temps[2].append(row["TEMP"])
+			hums[2].append(row["HUM"])
+		elif (row["SENSOR"] == 22):
+			dates[3].append(row["FECHA"])
+			temps[3].append(row["TEMP"])
+			hums[3].append(row["HUM"])
+		elif (row["SENSOR"] == 23):
+			dates[4].append(row["FECHA"])
+			temps[4].append(row["TEMP"])
+			hums[4].append(row["HUM"])
+		elif (row["SENSOR"] == 24):
+			dates[5].append(row["FECHA"])
+			temps[5].append(row["TEMP"])
+			hums[5].append(row["HUM"])
+		elif (row["SENSOR"] == 25):
+			dates[6].append(row["FECHA"])
+			temps[6].append(row["TEMP"])
+			hums[6].append(row["HUM"])
+		elif (row["SENSOR"] == 27):
+			dates[7].append(row["FECHA"])
+			temps[7].append(row["TEMP"])
+			hums[7].append(row["HUM"])
 			
 	return dates,temps,hums
 

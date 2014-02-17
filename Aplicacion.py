@@ -2,10 +2,12 @@
 
 import subprocess
 import pygtk
+import datetime
 pygtk.require("2.0")
 import gtk
 import gtk.glade
-import PostgreSQL
+import psycopg2
+import psycopg2.extras
 import sys
 from time import sleep
 from Plot import plot
@@ -14,7 +16,6 @@ CONF_PATH = "/home/pi/digitemp.conf"
 USB_ADAPTER = "digitemp_DS9097U"
 USB_PATH = "/dev/ttyUSB0"
 NO_USB_ADAPTER = "DigiTemp v3.5.0 Copyright 1996-2007 by Brian C. Lane\nGNU General Public License v2.0 - http://www.digitemp.com\n"
-ctr = "control"
 separador = ";"
 pines = ["4","17","18","22","23","24","25","27"]
 errores = ["Ya existe sesion activa","Debe terminar la sesion activa para bajar datos",
@@ -26,42 +27,58 @@ def IniciarCensado(gui,nombre,ciclo,sensor,terminal):
 	bajo el nombre de "nombre", se asume que no esta censando actualmente
 	"""
 	if (Estado() == 0):
-		db = PostgreSQL.PostgreSQL(namedb="BioGuardDB",username="BioGuard",host='localhost',passw="bioguardpassword")
-		db.UpdateRegisterInTable(ctr,["id",1],["name",nombre])
-		db.UpdateRegisterInTable(ctr,["id",1],["ciclo",ciclo-1])
-		db.UpdateRegisterInTable(ctr,["id",1],["veces",0])
-		db.UpdateRegisterInTable(ctr,["id",1],["status",1])
-		if (sensor == 1):
-			db.UpdateRegisterInTable(ctr,["id",1],["sensor",11])
+		db = psycopg2.connect(database="MapeoDB", user="pablo", password="bioguardpassword")
+		cursor = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
+		cursor.execute("INSERT INTO sesion (\"NOMBRE\",\"CICLO\",\"CONT\",\"GPIO\",\"ONEWIRE\",\"INICIO\") VALUES (%s,%s,%s,'{0,0,0,0,0,0,0,0}',0,%s)",(nombre,ciclo-1,0,datetime.datetime.now().strftime('%Y-%m-%d %H:%M')))
+		db.commit()
+		cursor.execute("SELECT \"ID\" FROM sesion WHERE \"NOMBRE\"=%s",(nombre,))
+		sesion = cursor.fetchone()
+		cursor.execute("UPDATE control SET \"ID_SESION\"=%s, \"ESTADO\"=1 WHERE \"ID\"=1",(sesion["ID"],))
+		db.commit()
+		
+		
+		"""if (sensor == 1):
+			#db.UpdateRegisterInTable(ctr,["id",1],["sensor",11])
+			cursor.execute("UPDATE \"control\" SET \"name\"=%s, \"ciclo\"=%s, \"sensor\"=%s, \"veces\"=%s, \"status\"=%s WHERE \"id\"=1",(nombre,ciclo-1,11,0,1))
 		else:
-			db.UpdateRegisterInTable(ctr,["id",1],["sensor",22])
+			#db.UpdateRegisterInTable(ctr,["id",1],["sensor",22])
+			cursor.execute("UPDATE \"control\" SET \"name\"=%s, \"ciclo\"=%s, \"sensor\"=%s, \"veces\"=%s, \"status\"=%s WHERE \"id\"=1",(nombre,ciclo-1,22,0,1))
+		db.commit()"""
+
 		#Configuro los sensores 1wire
 		salida = subprocess.Popen(["sudo",USB_ADAPTER,"-i","-s",USB_PATH,"-c",CONF_PATH],stdout=subprocess.PIPE).communicate()[0]
 		if (salida != NO_USB_ADAPTER):
 			f = open("/home/pi/digitemp.conf","r")
 			lines = f.readlines()
 			lines = lines[7:]
+			cursor.execute("UPDATE sesion SET \"ONEWIRE\"=%s WHERE \"ID\"=%s",(len(lines),sesion["ID"]))
+			db.commit()
 			#gui.glade.get_object("label23").set_markup('<span color="green">%i</span>'%(len(lines)))
 			f.close()
 		else:
 			gui.glade.get_object("label23").set_markup('<span color="red">-</span>')
+		
 		#Busco que sensor de temp/hum esta conectado
 		for i in range(len(pines)):
 			intentos = 0
 			MAX_INTENTOS = 3
-			salida = subprocess.Popen(["sudo","/home/pi/Desktop/Python/Adafruit_DHT2",str(Sensor()),pines[i]],stdout=subprocess.PIPE).communicate()[0]
-                	while (salida == "" and intentos <= MAX_INTENTOS): #Intento tomar la medida
-                        	sleep(1)
-                               	salida = subprocess.Popen(["sudo","/home/pi/Desktop/Python/Adafruit_DHT2",str(Sensor()),pines[i]],stdout=subprocess.PIPE).communicate()[0]
-                               	intentos += +1
-               		if (intentos <= MAX_INTENTOS):#Hay sensor
-				db.UpdateRegisterInTable(ctr,["id",1],["gpio"+pines[i],1])
+			salida = subprocess.Popen(["sudo","/home/pi/Desktop/Python/Adafruit_DHT2","22",pines[i]],stdout=subprocess.PIPE).communicate()[0]
+			while (salida == "" and intentos <= MAX_INTENTOS): #Intento tomar la medida
+				sleep(1)
+				salida = subprocess.Popen(["sudo","/home/pi/Desktop/Python/Adafruit_DHT2","22",pines[i]],stdout=subprocess.PIPE).communicate()[0]
+				intentos += +1
+			if (intentos <= MAX_INTENTOS):#Hay sensor
+				cursor.execute("UPDATE sesion SET \"GPIO\"[%s]=%s WHERE \"ID\"=%s",(i+1,1,sesion["ID"]))
+				db.commit()
 			else:
-				db.UpdateRegisterInTable(ctr,["id",1],["gpio"+pines[i],0])
-                       	sleep(1)
-                       	intentos = 0
+				cursor.execute("UPDATE sesion SET \"GPIO\"[%s]=%s WHERE \"ID\"=%s",(i+1,0,sesion["ID"]))
+				db.commit()
+
+			sleep(1)
+			intentos = 0
 			
-		db.CloseDB()
+		db.close()
+
 		if (not terminal):
 			sensores = SensoresActivos()
 			gui.glade.get_object("label23").set_markup('<span color="green">%i</span>'%(sensores[1]))
@@ -110,9 +127,14 @@ def TerminarCensado(gui,terminal):
 	"""
 	Cancela el censado actual, asume que actualmente se esta censando
 	"""
-	db = PostgreSQL.PostgreSQL(namedb="BioGuardDB",username="BioGuard",host='localhost',passw="bioguardpassword")
+	db = psycopg2.connect(database="MapeoDB", user="pablo", password="bioguardpassword")
+	cursor = db.cursor()
+
 	if (Estado() == 1):
-		db.UpdateRegisterInTable(ctr,["id",1],["status",0])
+		cursor.execute("UPDATE control SET \"ESTADO\"=0 WHERE \"ID\"=1")
+		cursor.execute("UPDATE sesion SET \"FIN\"=%s",(datetime.datetime.now().strftime('%Y-%m-%d %H:%M'),))
+		db.commit()
+
 		if (not terminal):
 			gui.glade.get_object("label23").set_markup('<span color="red">-</span>')
 			BajarDatos(Nombre(),0)
@@ -126,31 +148,38 @@ def TerminarCensado(gui,terminal):
 			GUI_Mensaje(errores[2])
 		else:
 			print(errores[2])
-	db.CloseDB()
+	db.close()
 			
 def BajarDatos(nombre,terminal): 
 	"""
 	Baja los datos de la sesion con nombre pasado como parametro
 	"""
 	if (Nombre() != nombre or Estado() == 0):
-		db = PostgreSQL.PostgreSQL(namedb="BioGuardDB",username="BioGuard",host='localhost',passw="bioguardpassword")
-		row = db.SelectFromTable(ctr,["id",1])
-		rows = db.SelectFromTable("register",["name",nombre])
+		db = psycopg2.connect(database="MapeoDB", user="pablo", password="bioguardpassword")
+		cursor = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
+		cursor.execute("SELECT \"ID_SESION\" FROM control WHERE \"ID\"=1")
+		control = cursor.fetchone()
+		
+		cursor.execute("SELECT * FROM registro WHERE \"ID\"=%s ORDER BY \"ID\"",(control["ID_SESION"],))
+		rows = cursor.fetchall()
+		
 		if (len(rows) > 0):
 			f = open("/home/pi/Desktop/Python/" + nombre + "_humtemp.txt","w")
-			for elem in rows:
-				line = elem[1] + separador + str(elem[2]) + separador + str(elem[3]) + separador + str(elem[4]) + separador + str(elem[5])
-				f.write(line + "\n")
-			f.close()
-		
-			rows = db.SelectFromTable("register_temp",["name",nombre])
-			if (len(row)):
-				f = open("/home/pi/Desktop/Python/" + nombre + "_temp.txt","w")
-				for elem in rows:
-					line = elem[1] + separador + str(elem[2]) + separador + str(elem[3]) + separador + str(elem[4])
-                                	f.write(line + "\n")
-                        	f.close()
+			g = open("/home/pi/Desktop/Python/" + nombre + "_temp.txt","w")
+			one_wire = False;
+			for row in rows:
+				if(row["TIPO"] == "H"):
+					linea = row["SENSOR"] + separador + str(row["FECHA"]) + separador + str(row["TEMP"]) + separador + str(row["HUM"])
+					f.write(linea+"\n")
+				else:
+					one_wire = True
+					linea = row["SENSOR"] + separador + str(row["FECHA"]) + separador + str(row["TEMP"]) + separador + str(row["HUM"])
+					g.write(linea+"\n")
 			
+			f.close()
+			g.close()
+					
+			if (one_wire):
 				f = open("/home/pi/digitemp.conf","r")
 				lineas = f.readlines()
 				lineas = lineas[7:]
@@ -159,8 +188,9 @@ def BajarDatos(nombre,terminal):
 					rom = lineas[i][lineas[i].find("0x"):-2]
 					sensor_roms.write("SENSOR:%i -> ROM:%s\n"%(i,rom))
 				f.close()
+			
 				sensor_roms.close()
-					
+			
 			if (not terminal):
 				GUI_Mensaje("%s: Datos guardados correctamente" %(nombre))
 			else:
@@ -168,73 +198,83 @@ def BajarDatos(nombre,terminal):
 		else:
 			if (not terminal):
 				GUI_Mensaje("%s: No existen registros" %(nombre))
-			else:
+			else:	
 				print("%s: No existen registros" %(nombre))	
-		db.CloseDB()
+		db.close()
+		
 	else:
 		if (not terminal):
 			GUI_Mensaje(errores[3])
 		else:
 			print(errores[3])	
 	
+	
 def Estado():
 	"""
 	Retorna el estado actual del censado
 	"""
-	db = PostgreSQL.PostgreSQL(namedb="BioGuardDB",username="BioGuard",host='localhost',passw="bioguardpassword")
-	row = db.SelectFromTable(ctr,["id",1])
-	db.CloseDB()
-	if (row[0][4] == 1):
-		return 1
-	else:
-		return 0
+	db = psycopg2.connect(database="MapeoDB", user="pablo", password="bioguardpassword")
+	cursor = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
+	cursor.execute("SELECT \"ESTADO\" FROM control WHERE \"ID\"=1")
+	control = cursor.fetchone()
+	db.close()
+	return control["ESTADO"]
 	
 def Nombre():
 	"""
 	Retorna el nombre del censado actual
 	"""
-	db = PostgreSQL.PostgreSQL(namedb="BioGuardDB",username="BioGuard",host='localhost',passw="bioguardpassword")
-	row = db.SelectFromTable(ctr,["id",1])
-	db.CloseDB()
-	return row[0][1]
+	db = psycopg2.connect(database="MapeoDB", user="pablo", password="bioguardpassword")
+	cursor = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
+	cursor.execute("SELECT \"ID_SESION\" FROM control WHERE \"ID\"=1")
+	control = cursor.fetchone()
+	cursor.execute("SELECT \"NOMBRE\" FROM sesion WHERE \"ID\"=%s",(control["ID_SESION"],))
+	sesion = cursor.fetchone()
+	db.close()
+	return sesion["NOMBRE"]
 
 def Ciclo():
 	"""
 	Retorna el ciclo del censado actual
 	"""
-	db = PostgreSQL.PostgreSQL(namedb="BioGuardDB",username="BioGuard",host='localhost',passw="bioguardpassword")
-	row = db.SelectFromTable(ctr,["id",1])
-	db.CloseDB()
-	return row[0][2] + 1
-	
-def Sensor():
-	"""
-	Retorna el tipo de sensor
-	"""
-	db = PostgreSQL.PostgreSQL(namedb="BioGuardDB",username="BioGuard",host='localhost',passw="bioguardpassword")
-	row = db.SelectFromTable(ctr,["id",1])
-	db.CloseDB()
-	return row[0][5]
+	db = psycopg2.connect(database="MapeoDB", user="pablo", password="bioguardpassword")
+	cursor = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
+	cursor.execute("SELECT \"ID_SESION\" FROM control WHERE \"ID\"=1")
+	control = cursor.fetchone()
+	cursor.execute("SELECT \"CICLO\" FROM sesion WHERE \"ID\"=%s",(control["ID_SESION"],))
+	sesion = cursor.fetchone()
+	db.close()
+	return sesion["CICLO"] + 1
 
+"""	
+def Sensor():
+	#db = PostgreSQL.PostgreSQL(namedb="BioGuardDB",username="BioGuard",host='localhost',passw="bioguardpassword")
+	#row = db.SelectFromTable(ctr,["id",1])
+	#db.CloseDB()
+	#return row[0][5]
+	db = psycopg2.connect(database="MapeoDB", user="pablo", password="bioguardpassword")
+	cursor = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
+	cursor.execute("SELECT \"sensor\" FROM \"control\" WHERE \"ID\"=1")
+	row = cursor.fetchone()
+	db.close()
+	return row["sensor"]
+"""
 def SensoresActivos():
 	"""
 	Retorna una lista con los sensores, activos y desactivos
 	"""
-	db = PostgreSQL.PostgreSQL(namedb="BioGuardDB",username="BioGuard",host='localhost',passw="bioguardpassword")
-	row = db.SelectFromTable(ctr,["id",1])
-	db.CloseDB()
-	sensores = []
-	cant = 0
-	salida = subprocess.Popen(["sudo",USB_ADAPTER,"-i","-s",USB_PATH,"-c",CONF_PATH],stdout=subprocess.PIPE).communicate()[0]
-        if (salida != NO_USB_ADAPTER):
-        	f = open("/home/pi/digitemp.conf","r")
-        	lines = f.readlines()
-        	lines = lines[7:]
-		cant = len(lines)
-        	f.close()
-        for i in range(6,len(row[0])):
-		sensores.append(row[0][i])
-	return [sensores,cant]	
+	db = psycopg2.connect(database="MapeoDB", user="pablo", password="bioguardpassword")
+	cursor = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
+	cursor.execute("SELECT \"ID_SESION\" FROM control WHERE \"ID\"=1")
+	control = cursor.fetchone()
+    
+	cursor.execute("SELECT \"GPIO\", \"ONEWIRE\" FROM sesion WHERE \"ID\"=%s",(control["ID_SESION"],))
+	sesion= cursor.fetchone()
+	db.close()
+
+	sensores = sesion["GPIO"]
+	one_wire = sesion["ONEWIRE"]
+	return [sensores,one_wire]	
 
 class GUI_Mensaje():
 	def __init__(self,texto):
@@ -251,7 +291,8 @@ class GUI_Mensaje():
 class App():
 	
 	def __init__(self):
-		self.gladefile = "/home/pi/Desktop/Python/app.glade" 
+		#self.gladefile = "/home/pi/Desktop/Python/app.glade"
+		self.gladefile = "/home/pablo/HumTemp/app.glade" 
 		self.glade = gtk.Builder()
 		self.glade.add_from_file(self.gladefile)
 		self.glade.connect_signals(self)
@@ -260,10 +301,10 @@ class App():
 		self.glade.get_object("window1").connect("delete-event", gtk.main_quit)
 
 		self.functions = {"start":self.startButton,
-	                     "stop":self.stopButton,
-        	             "download":self.downloadData,
-                	     "plot":self.plotData,
-                    	     "exit":self.exit}
+						 "stop":self.stopButton,
+						 "download":self.downloadData,
+						 "plot":self.plotData,
+						 "exit":self.exit}
                     	     
 		if (Estado() == 1):
 			self.glade.get_object("label5").set_markup('<span color="green">CENSANDO</span>')
@@ -275,16 +316,18 @@ class App():
 			self.glade.get_object("entry4").set_text(str(Ciclo()))
 			self.glade.get_object("combobox1").set_sensitive(False)
 			listaelementos=gtk.ListStore(str)
+			"""
 			if (Sensor() == 11):
-                        	listaelementos.append(["DHT22"])
-                        	listaelementos.append(["DHT11"])
+				listaelementos.append(["DHT22"])
+				listaelementos.append(["DHT11"])
 			else:
 				listaelementos.append(["DHT11"])
-                                listaelementos.append(["DHT22"])
-                        self.glade.get_object("combobox1").set_model(listaelementos)
-                        render = gtk.CellRendererText()
-                        self.glade.get_object("combobox1").pack_start(render, True)
-                        self.glade.get_object("combobox1").add_attribute(render, 'text', 0)
+				listaelementos.append(["DHT22"])
+				self.glade.get_object("combobox1").set_model(listaelementos)
+				render = gtk.CellRendererText()
+				self.glade.get_object("combobox1").pack_start(render, True)
+				self.glade.get_object("combobox1").add_attribute(render, 'text', 0)
+			"""
 			sensores = SensoresActivos()
 			if (sensores[1] != 0):
 				self.glade.get_object("label23").set_markup('<span color="green">%i</span>'%(sensores[1]))
@@ -340,12 +383,12 @@ class App():
 			self.glade.get_object("label17").set_markup('<span color="red">-</span>')
 			self.glade.get_object("label21").set_markup('<span color="red">-</span>')
 			listaelementos=gtk.ListStore(str)
-                        listaelementos.append(["DHT22"])
-                        listaelementos.append(["DHT11"])
-                        self.glade.get_object("combobox1").set_model(listaelementos)
-                        render = gtk.CellRendererText()
-                        self.glade.get_object("combobox1").pack_start(render, True)
-                        self.glade.get_object("combobox1").add_attribute(render, 'text', 0)
+			listaelementos.append(["DHT22"])
+			listaelementos.append(["DHT11"])
+			self.glade.get_object("combobox1").set_model(listaelementos)
+			render = gtk.CellRendererText()
+			self.glade.get_object("combobox1").pack_start(render, True)
+			self.glade.get_object("combobox1").add_attribute(render, 'text', 0)
 			
 	
 	def startButton(self,widget):
@@ -467,4 +510,3 @@ if __name__ == "__main__":
 	else:
 		gui = App()
 		gtk.main()
-
