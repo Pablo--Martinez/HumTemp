@@ -14,7 +14,7 @@ pins = ["4","17","18","27","22","23","24","25"]
 MAX_INTENTOS = 3
 intentos = 0
 
-db = psycopg2.connect(database="MapeoDB", user="pablo", password="bioguardpassword")
+db = psycopg2.connect(database="MapeoDB", user="pi", password="bioguardpassword")
 cursor = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
 cursor.execute("SELECT * FROM control WHERE \"ID\"=1") #Busco el estado de la app
 status = cursor.fetchone()

@@ -27,7 +27,7 @@ def IniciarCensado(gui,nombre,ciclo,sensor,terminal):
 	bajo el nombre de "nombre", se asume que no esta censando actualmente
 	"""
 	if (Estado() == 0):
-		db = psycopg2.connect(database="MapeoDB", user="pablo", password="bioguardpassword")
+		db = psycopg2.connect(database="MapeoDB", user="pi", password="bioguardpassword")
 		cursor = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
 		cursor.execute("INSERT INTO sesion (\"NOMBRE\",\"CICLO\",\"CONT\",\"GPIO\",\"ONEWIRE\",\"INICIO\") VALUES (%s,%s,%s,'{0,0,0,0,0,0,0,0}',0,%s)",(nombre,ciclo-1,0,datetime.datetime.now().strftime('%Y-%m-%d %H:%M')))
 		db.commit()
@@ -127,7 +127,7 @@ def TerminarCensado(gui,terminal):
 	"""
 	Cancela el censado actual, asume que actualmente se esta censando
 	"""
-	db = psycopg2.connect(database="MapeoDB", user="pablo", password="bioguardpassword")
+	db = psycopg2.connect(database="MapeoDB", user="pi", password="bioguardpassword")
 	cursor = db.cursor()
 
 	if (Estado() == 1):
@@ -155,7 +155,7 @@ def BajarDatos(nombre,terminal):
 	Baja los datos de la sesion con nombre pasado como parametro
 	"""
 	if (Nombre() != nombre or Estado() == 0):
-		db = psycopg2.connect(database="MapeoDB", user="pablo", password="bioguardpassword")
+		db = psycopg2.connect(database="MapeoDB", user="pi", password="bioguardpassword")
 		cursor = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
 		cursor.execute("SELECT \"ID_SESION\" FROM control WHERE \"ID\"=1")
 		control = cursor.fetchone()
@@ -213,7 +213,7 @@ def Estado():
 	"""
 	Retorna el estado actual del censado
 	"""
-	db = psycopg2.connect(database="MapeoDB", user="pablo", password="bioguardpassword")
+	db = psycopg2.connect(database="MapeoDB", user="pi", password="bioguardpassword")
 	cursor = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
 	cursor.execute("SELECT \"ESTADO\" FROM control WHERE \"ID\"=1")
 	control = cursor.fetchone()
@@ -224,7 +224,7 @@ def Nombre():
 	"""
 	Retorna el nombre del censado actual
 	"""
-	db = psycopg2.connect(database="MapeoDB", user="pablo", password="bioguardpassword")
+	db = psycopg2.connect(database="MapeoDB", user="pi", password="bioguardpassword")
 	cursor = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
 	cursor.execute("SELECT \"ID_SESION\" FROM control WHERE \"ID\"=1")
 	control = cursor.fetchone()
@@ -237,7 +237,7 @@ def Ciclo():
 	"""
 	Retorna el ciclo del censado actual
 	"""
-	db = psycopg2.connect(database="MapeoDB", user="pablo", password="bioguardpassword")
+	db = psycopg2.connect(database="MapeoDB", user="pi", password="bioguardpassword")
 	cursor = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
 	cursor.execute("SELECT \"ID_SESION\" FROM control WHERE \"ID\"=1")
 	control = cursor.fetchone()
@@ -263,7 +263,7 @@ def SensoresActivos():
 	"""
 	Retorna una lista con los sensores, activos y desactivos
 	"""
-	db = psycopg2.connect(database="MapeoDB", user="pablo", password="bioguardpassword")
+	db = psycopg2.connect(database="MapeoDB", user="pi", password="bioguardpassword")
 	cursor = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
 	cursor.execute("SELECT \"ID_SESION\" FROM control WHERE \"ID\"=1")
 	control = cursor.fetchone()
@@ -292,7 +292,7 @@ class App():
 	
 	def __init__(self):
 		#self.gladefile = "/home/pi/Desktop/Python/app.glade"
-		self.gladefile = "/home/pablo/HumTemp/app.glade" 
+		self.gladefile = "/home/pi/Desktop/HumTemp/app.glade" 
 		self.glade = gtk.Builder()
 		self.glade.add_from_file(self.gladefile)
 		self.glade.connect_signals(self)

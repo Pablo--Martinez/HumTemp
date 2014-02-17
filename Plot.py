@@ -19,7 +19,7 @@ def get_data(name):
 	dates = [[],[],[],[],[],[],[],[]]
 	temps = [[],[],[],[],[],[],[],[]]
 	hums = [[],[],[],[],[],[],[],[]]
-	db = psycopg2.connect(database="MapeoDB", user="pablo", password="bioguardpassword")
+	db = psycopg2.connect(database="MapeoDB", user="pi", password="bioguardpassword")
 	cursor = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
 	cursor.execute("SELECT \"ID\" FROM sesion WHERE \"NOMBRE\"=%s",(name,))
 	sesion = cursor.fetchone()
