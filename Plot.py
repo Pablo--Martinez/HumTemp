@@ -24,7 +24,7 @@ def get_data(name):
 	cursor.execute("SELECT \"ID\" FROM sesion WHERE \"NOMBRE\"=%s",(name,))
 	sesion = cursor.fetchone()
 	
-	cursor.execute("SELECT * FROM registro WHERE \"ID_SESION\"=%s AND \"TIPO\"=\"H\" ORDER BY \"ID\"",(sesion["ID"],))
+	cursor.execute("SELECT * FROM registro WHERE \"ID_SESION\"=%s AND \"TIPO\"=\'H\' ORDER BY \"ID\"",(sesion["ID"],))
 	rows = cursor.fetchall()
 	db.close()
 	

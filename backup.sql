@@ -29,12 +29,8 @@ SET default_tablespace = '';
 SET default_with_oids = false;
 
 --
--- Name: control; Type: TABLE; Schema: public; Owner: pablo; Tablespace: 
+-- Name: control; Type: TABLE; Schema: public; Owner: pi; Tablespace: 
 --
-
-DROP TABLE control;
-DROP TABLE registro;
-DROP TABLE sesion;
 
 CREATE TABLE control (
     "ID" integer NOT NULL,
@@ -43,10 +39,10 @@ CREATE TABLE control (
 );
 
 
-ALTER TABLE public.control OWNER TO pablo;
+ALTER TABLE public.control OWNER TO pi;
 
 --
--- Name: control_ID_seq; Type: SEQUENCE; Schema: public; Owner: pablo
+-- Name: control_ID_seq; Type: SEQUENCE; Schema: public; Owner: pi
 --
 
 CREATE SEQUENCE "control_ID_seq"
@@ -57,17 +53,17 @@ CREATE SEQUENCE "control_ID_seq"
     CACHE 1;
 
 
-ALTER TABLE public."control_ID_seq" OWNER TO pablo;
+ALTER TABLE public."control_ID_seq" OWNER TO pi;
 
 --
--- Name: control_ID_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: pablo
+-- Name: control_ID_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: pi
 --
 
 ALTER SEQUENCE "control_ID_seq" OWNED BY control."ID";
 
 
 --
--- Name: registro; Type: TABLE; Schema: public; Owner: pablo; Tablespace: 
+-- Name: registro; Type: TABLE; Schema: public; Owner: pi; Tablespace: 
 --
 
 CREATE TABLE registro (
@@ -81,10 +77,10 @@ CREATE TABLE registro (
 );
 
 
-ALTER TABLE public.registro OWNER TO pablo;
+ALTER TABLE public.registro OWNER TO pi;
 
 --
--- Name: registro_ID_seq; Type: SEQUENCE; Schema: public; Owner: pablo
+-- Name: registro_ID_seq; Type: SEQUENCE; Schema: public; Owner: pi
 --
 
 CREATE SEQUENCE "registro_ID_seq"
@@ -95,17 +91,17 @@ CREATE SEQUENCE "registro_ID_seq"
     CACHE 1;
 
 
-ALTER TABLE public."registro_ID_seq" OWNER TO pablo;
+ALTER TABLE public."registro_ID_seq" OWNER TO pi;
 
 --
--- Name: registro_ID_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: pablo
+-- Name: registro_ID_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: pi
 --
 
 ALTER SEQUENCE "registro_ID_seq" OWNED BY registro."ID";
 
 
 --
--- Name: sesion; Type: TABLE; Schema: public; Owner: pablo; Tablespace: 
+-- Name: sesion; Type: TABLE; Schema: public; Owner: pi; Tablespace: 
 --
 
 CREATE TABLE sesion (
@@ -120,10 +116,10 @@ CREATE TABLE sesion (
 );
 
 
-ALTER TABLE public.sesion OWNER TO pablo;
+ALTER TABLE public.sesion OWNER TO pi;
 
 --
--- Name: sesion_ID_seq; Type: SEQUENCE; Schema: public; Owner: pablo
+-- Name: sesion_ID_seq; Type: SEQUENCE; Schema: public; Owner: pi
 --
 
 CREATE SEQUENCE "sesion_ID_seq"
@@ -134,38 +130,38 @@ CREATE SEQUENCE "sesion_ID_seq"
     CACHE 1;
 
 
-ALTER TABLE public."sesion_ID_seq" OWNER TO pablo;
+ALTER TABLE public."sesion_ID_seq" OWNER TO pi;
 
 --
--- Name: sesion_ID_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: pablo
+-- Name: sesion_ID_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: pi
 --
 
 ALTER SEQUENCE "sesion_ID_seq" OWNED BY sesion."ID";
 
 
 --
--- Name: ID; Type: DEFAULT; Schema: public; Owner: pablo
+-- Name: ID; Type: DEFAULT; Schema: public; Owner: pi
 --
 
 ALTER TABLE ONLY control ALTER COLUMN "ID" SET DEFAULT nextval('"control_ID_seq"'::regclass);
 
 
 --
--- Name: ID; Type: DEFAULT; Schema: public; Owner: pablo
+-- Name: ID; Type: DEFAULT; Schema: public; Owner: pi
 --
 
 ALTER TABLE ONLY registro ALTER COLUMN "ID" SET DEFAULT nextval('"registro_ID_seq"'::regclass);
 
 
 --
--- Name: ID; Type: DEFAULT; Schema: public; Owner: pablo
+-- Name: ID; Type: DEFAULT; Schema: public; Owner: pi
 --
 
 ALTER TABLE ONLY sesion ALTER COLUMN "ID" SET DEFAULT nextval('"sesion_ID_seq"'::regclass);
 
 
 --
--- Data for Name: control; Type: TABLE DATA; Schema: public; Owner: pablo
+-- Data for Name: control; Type: TABLE DATA; Schema: public; Owner: pi
 --
 
 COPY control ("ID", "ID_SESION", "ESTADO") FROM stdin;
@@ -174,29 +170,29 @@ COPY control ("ID", "ID_SESION", "ESTADO") FROM stdin;
 
 
 --
--- Name: control_ID_seq; Type: SEQUENCE SET; Schema: public; Owner: pablo
+-- Name: control_ID_seq; Type: SEQUENCE SET; Schema: public; Owner: pi
 --
 
 SELECT pg_catalog.setval('"control_ID_seq"', 2, true);
 
 
 --
--- Data for Name: registro; Type: TABLE DATA; Schema: public; Owner: pablo
+-- Data for Name: registro; Type: TABLE DATA; Schema: public; Owner: pi
 --
 
-COPY registro ("ID", "ID_SESION", "TIPO", "TEMP", "HUM", "FECHA") FROM stdin;
+COPY registro ("ID", "ID_SESION", "TIPO", "SENSOR", "TEMP", "HUM", "FECHA") FROM stdin;
 \.
 
 
 --
--- Name: registro_ID_seq; Type: SEQUENCE SET; Schema: public; Owner: pablo
+-- Name: registro_ID_seq; Type: SEQUENCE SET; Schema: public; Owner: pi
 --
 
 SELECT pg_catalog.setval('"registro_ID_seq"', 1, false);
 
 
 --
--- Data for Name: sesion; Type: TABLE DATA; Schema: public; Owner: pablo
+-- Data for Name: sesion; Type: TABLE DATA; Schema: public; Owner: pi
 --
 
 COPY sesion ("ID", "NOMBRE", "CICLO", "CONT", "GPIO", "ONEWIRE", "INICIO", "FIN") FROM stdin;
@@ -204,14 +200,14 @@ COPY sesion ("ID", "NOMBRE", "CICLO", "CONT", "GPIO", "ONEWIRE", "INICIO", "FIN"
 
 
 --
--- Name: sesion_ID_seq; Type: SEQUENCE SET; Schema: public; Owner: pablo
+-- Name: sesion_ID_seq; Type: SEQUENCE SET; Schema: public; Owner: pi
 --
 
 SELECT pg_catalog.setval('"sesion_ID_seq"', 1, true);
 
 
 --
--- Name: control_pkey; Type: CONSTRAINT; Schema: public; Owner: pablo; Tablespace: 
+-- Name: control_pkey; Type: CONSTRAINT; Schema: public; Owner: pi; Tablespace: 
 --
 
 ALTER TABLE ONLY control
@@ -219,7 +215,7 @@ ALTER TABLE ONLY control
 
 
 --
--- Name: registro_pkey; Type: CONSTRAINT; Schema: public; Owner: pablo; Tablespace: 
+-- Name: registro_pkey; Type: CONSTRAINT; Schema: public; Owner: pi; Tablespace: 
 --
 
 ALTER TABLE ONLY registro
@@ -227,7 +223,7 @@ ALTER TABLE ONLY registro
 
 
 --
--- Name: sesion_pkey; Type: CONSTRAINT; Schema: public; Owner: pablo; Tablespace: 
+-- Name: sesion_pkey; Type: CONSTRAINT; Schema: public; Owner: pi; Tablespace: 
 --
 
 ALTER TABLE ONLY sesion
@@ -235,7 +231,7 @@ ALTER TABLE ONLY sesion
 
 
 --
--- Name: control_ID_SESION_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pablo
+-- Name: control_ID_SESION_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pi
 --
 
 ALTER TABLE ONLY control
@@ -243,7 +239,7 @@ ALTER TABLE ONLY control
 
 
 --
--- Name: registro_ID_SESION_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pablo
+-- Name: registro_ID_SESION_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pi
 --
 
 ALTER TABLE ONLY registro
@@ -258,6 +254,36 @@ REVOKE ALL ON SCHEMA public FROM PUBLIC;
 REVOKE ALL ON SCHEMA public FROM postgres;
 GRANT ALL ON SCHEMA public TO postgres;
 GRANT ALL ON SCHEMA public TO PUBLIC;
+
+
+--
+-- Name: control; Type: ACL; Schema: public; Owner: pi
+--
+
+REVOKE ALL ON TABLE control FROM PUBLIC;
+REVOKE ALL ON TABLE control FROM pi;
+GRANT ALL ON TABLE control TO pi;
+GRANT ALL ON TABLE control TO root;
+
+
+--
+-- Name: registro; Type: ACL; Schema: public; Owner: pi
+--
+
+REVOKE ALL ON TABLE registro FROM PUBLIC;
+REVOKE ALL ON TABLE registro FROM pi;
+GRANT ALL ON TABLE registro TO pi;
+GRANT ALL ON TABLE registro TO root;
+
+
+--
+-- Name: sesion; Type: ACL; Schema: public; Owner: pi
+--
+
+REVOKE ALL ON TABLE sesion FROM PUBLIC;
+REVOKE ALL ON TABLE sesion FROM pi;
+GRANT ALL ON TABLE sesion TO pi;
+GRANT ALL ON TABLE sesion TO root;
 
 
 --

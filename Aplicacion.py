@@ -11,6 +11,7 @@ import psycopg2.extras
 import sys
 from time import sleep
 from Plot import plot
+from os import mkdir
 
 CONF_PATH = "/home/pi/digitemp.conf"
 USB_ADAPTER = "digitemp_DS9097U"
@@ -62,10 +63,10 @@ def IniciarCensado(gui,nombre,ciclo,sensor,terminal):
 		for i in range(len(pines)):
 			intentos = 0
 			MAX_INTENTOS = 3
-			salida = subprocess.Popen(["sudo","/home/pi/Desktop/Python/Adafruit_DHT2","22",pines[i]],stdout=subprocess.PIPE).communicate()[0]
+			salida = subprocess.Popen(["sudo","/home/pi/Desktop/HumTemp/Adafruit_DHT2","22",pines[i]],stdout=subprocess.PIPE).communicate()[0]
 			while (salida == "" and intentos <= MAX_INTENTOS): #Intento tomar la medida
 				sleep(1)
-				salida = subprocess.Popen(["sudo","/home/pi/Desktop/Python/Adafruit_DHT2","22",pines[i]],stdout=subprocess.PIPE).communicate()[0]
+				salida = subprocess.Popen(["sudo","/home/pi/Desktop/HumTemp/Adafruit_DHT2","22",pines[i]],stdout=subprocess.PIPE).communicate()[0]
 				intentos += +1
 			if (intentos <= MAX_INTENTOS):#Hay sensor
 				cursor.execute("UPDATE sesion SET \"GPIO\"[%s]=%s WHERE \"ID\"=%s",(i+1,1,sesion["ID"]))
@@ -157,44 +158,47 @@ def BajarDatos(nombre,terminal):
 	if (Nombre() != nombre or Estado() == 0):
 		db = psycopg2.connect(database="MapeoDB", user="pi", password="bioguardpassword")
 		cursor = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
-		cursor.execute("SELECT \"ID_SESION\" FROM control WHERE \"ID\"=1")
-		control = cursor.fetchone()
+		cursor.execute("SELECT \"ID\" FROM sesion WHERE \"NOMBRE\"=%s",(nombre,))
+		sesion = cursor.fetchone()
 		
-		cursor.execute("SELECT * FROM registro WHERE \"ID\"=%s ORDER BY \"ID\"",(control["ID_SESION"],))
-		rows = cursor.fetchall()
-		
-		if (len(rows) > 0):
-			f = open("/home/pi/Desktop/Python/" + nombre + "_humtemp.txt","w")
-			g = open("/home/pi/Desktop/Python/" + nombre + "_temp.txt","w")
-			one_wire = False;
-			for row in rows:
-				if(row["TIPO"] == "H"):
-					linea = row["SENSOR"] + separador + str(row["FECHA"]) + separador + str(row["TEMP"]) + separador + str(row["HUM"])
-					f.write(linea+"\n")
-				else:
-					one_wire = True
-					linea = row["SENSOR"] + separador + str(row["FECHA"]) + separador + str(row["TEMP"]) + separador + str(row["HUM"])
-					g.write(linea+"\n")
-			
-			f.close()
-			g.close()
-					
-			if (one_wire):
-				f = open("/home/pi/digitemp.conf","r")
-				lineas = f.readlines()
-				lineas = lineas[7:]
-				sensor_roms = open("/home/pi/Desktop/Python/" + nombre + "_ROMS.txt","w")
-				for i in range(len(lineas)):
-					rom = lineas[i][lineas[i].find("0x"):-2]
-					sensor_roms.write("SENSOR:%i -> ROM:%s\n"%(i,rom))
+		if(type(sesion) == psycopg2.extras.DictRow):
+			cursor.execute("SELECT * FROM registro WHERE \"ID_SESION\"=%s ORDER BY \"ID\"",(sesion["ID"],))
+			rows = cursor.fetchall()
+				
+			if (len(rows) > 0):
+				dir = "/home/pi/Desktop/HumTemp/Archivos/%s" % nombre
+				mkdir(dir)
+				f = open("/home/pi/Desktop/HumTemp/Archivos/" + nombre + "/humedad.txt","w")
+				g = open("/home/pi/Desktop/HumTemp/Archivos/" + nombre + "/temperatura.txt","w")
+				one_wire = False;
+				for row in rows:
+					if(row["TIPO"] == "H"):
+						linea = str(row["SENSOR"]) + separador + str(row["FECHA"]) + separador + str(row["TEMP"]) + separador + str(row["HUM"])
+						f.write(linea+"\n")
+					else:
+						one_wire = True
+						linea = str(row["SENSOR"]) + separador + str(row["FECHA"]) + separador + str(row["TEMP"]) + separador
+						g.write(linea+"\n")
+				
 				f.close()
+				g.close()
+						
+				if (one_wire):
+					f = open("/home/pi/digitemp.conf","r")
+					lineas = f.readlines()
+					lineas = lineas[7:]
+					sensor_roms = open("/home/pi/Desktop/HumTemp/Archivos/" + nombre + "/ROMS.txt","w")
+					for i in range(len(lineas)):
+						rom = lineas[i][lineas[i].find("0x"):-2]
+						sensor_roms.write("SENSOR:%i -> ROM:%s\n"%(i,rom))
+					f.close()
+				
+					sensor_roms.close()
 			
-				sensor_roms.close()
-			
-			if (not terminal):
-				GUI_Mensaje("%s: Datos guardados correctamente" %(nombre))
-			else:
-				print("%s: Datos guardados correctamente" %(nombre))		
+				if (not terminal):
+					GUI_Mensaje("%s: Datos guardados correctamente" %(nombre))
+				else:
+					print("%s: Datos guardados correctamente" %(nombre))		
 		else:
 			if (not terminal):
 				GUI_Mensaje("%s: No existen registros" %(nombre))
@@ -291,7 +295,6 @@ class GUI_Mensaje():
 class App():
 	
 	def __init__(self):
-		#self.gladefile = "/home/pi/Desktop/Python/app.glade"
 		self.gladefile = "/home/pi/Desktop/HumTemp/app.glade" 
 		self.glade = gtk.Builder()
 		self.glade.add_from_file(self.gladefile)
