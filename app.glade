@@ -30,7 +30,7 @@
           <object class="GtkTable" id="table1">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="n_rows">4</property>
+            <property name="n_rows">3</property>
             <property name="n_columns">2</property>
             <child>
               <object class="GtkEntry" id="entry3">
@@ -67,21 +67,6 @@
               </packing>
             </child>
             <child>
-              <object class="GtkComboBox" id="combobox1">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="active">1</property>
-                <property name="tearoff_title">DHT11</property>
-                <property name="button_sensitivity">on</property>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
-                <property name="top_attach">3</property>
-                <property name="bottom_attach">4</property>
-              </packing>
-            </child>
-            <child>
               <object class="GtkLabel" id="label1">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
@@ -108,17 +93,6 @@
               <packing>
                 <property name="top_attach">2</property>
                 <property name="bottom_attach">3</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel" id="label4">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label" translatable="yes">SENSOR</property>
-              </object>
-              <packing>
-                <property name="top_attach">3</property>
-                <property name="bottom_attach">4</property>
               </packing>
             </child>
             <child>

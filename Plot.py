@@ -36,7 +36,7 @@ def get_data(name):
 		elif (row["SENSOR"] == 17):
 			dates[1].append(row["FECHA"])
 			temps[1].append(row["TEMP"])
-			hums[1].append(row["hum"])
+			hums[1].append(row["HUM"])
 		elif (row["SENSOR"] == 18):
 			dates[2].append(row["FECHA"])
 			temps[2].append(row["TEMP"])

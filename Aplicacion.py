@@ -22,7 +22,7 @@ pines = ["4","17","18","22","23","24","25","27"]
 errores = ["Ya existe sesion activa","Debe terminar la sesion activa para bajar datos",
 			"No existe sesion activa actualmente","No es posible bajar datos de sesion actual"]
 
-def IniciarCensado(gui,nombre,ciclo,sensor,terminal):
+def IniciarCensado(gui,nombre,ciclo,terminal):
 	"""
 	Inicia el ciclo de sensado, los datos son almacenados cada "ciclo" minutos
 	bajo el nombre de "nombre", se asume que no esta censando actualmente
@@ -30,7 +30,7 @@ def IniciarCensado(gui,nombre,ciclo,sensor,terminal):
 	if (Estado() == 0):
 		db = psycopg2.connect(database="MapeoDB", user="pi", password="bioguardpassword")
 		cursor = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
-		cursor.execute("INSERT INTO sesion (\"NOMBRE\",\"CICLO\",\"CONT\",\"GPIO\",\"ONEWIRE\",\"INICIO\") VALUES (%s,%s,%s,'{0,0,0,0,0,0,0,0}',0,%s)",(nombre,ciclo-1,0,datetime.datetime.now().strftime('%Y-%m-%d %H:%M')))
+		cursor.execute("INSERT INTO sesion (\"NOMBRE\",\"CICLO\",\"CONT\",\"GPIO\",\"ONEWIRE\",\"INICIO\") VALUES (%s,%s,%s,'{0,0,0,0,0,0,0,0}',0,%s)",(nombre,ciclo-1,ciclo-1,datetime.datetime.now().strftime('%Y-%m-%d %H:%M')))
 		db.commit()
 		cursor.execute("SELECT \"ID\" FROM sesion WHERE \"NOMBRE\"=%s",(nombre,))
 		sesion = cursor.fetchone()
@@ -317,7 +317,7 @@ class App():
 			self.glade.get_object("entry3").set_text(Nombre())
 			self.glade.get_object("entry4").set_sensitive(False)
 			self.glade.get_object("entry4").set_text(str(Ciclo()))
-			self.glade.get_object("combobox1").set_sensitive(False)
+			#self.glade.get_object("combobox1").set_sensitive(False)
 			listaelementos=gtk.ListStore(str)
 			"""
 			if (Sensor() == 11):
@@ -376,7 +376,7 @@ class App():
 			self.glade.get_object("button1").set_sensitive(True)
 			self.glade.get_object("entry3").set_sensitive(True)
 			self.glade.get_object("entry4").set_sensitive(True)
-			self.glade.get_object("combobox1").set_sensitive(True)
+			#self.glade.get_object("combobox1").set_sensitive(True)
 			self.glade.get_object("label7").set_markup('<span color="red">-</span>')
 			self.glade.get_object("label11").set_markup('<span color="red">-</span>')
 			self.glade.get_object("label15").set_markup('<span color="red">-</span>')
@@ -388,10 +388,10 @@ class App():
 			listaelementos=gtk.ListStore(str)
 			listaelementos.append(["DHT22"])
 			listaelementos.append(["DHT11"])
-			self.glade.get_object("combobox1").set_model(listaelementos)
+			#self.glade.get_object("combobox1").set_model(listaelementos)
 			render = gtk.CellRendererText()
-			self.glade.get_object("combobox1").pack_start(render, True)
-			self.glade.get_object("combobox1").add_attribute(render, 'text', 0)
+			#self.glade.get_object("combobox1").pack_start(render, True)
+			#self.glade.get_object("combobox1").add_attribute(render, 'text', 0)
 			
 	
 	def startButton(self,widget):
@@ -404,13 +404,13 @@ class App():
 		self.glade.get_object("button2").set_sensitive(True)
 		self.glade.get_object("entry3").set_sensitive(False)
 		self.glade.get_object("entry4").set_sensitive(False)
-		self.glade.get_object("combobox1").set_sensitive(False)
+		#self.glade.get_object("combobox1").set_sensitive(False)
 
 		#Obtengo los datos para iniciar la sesion}
 		nombre= str(self.glade.get_object("entry3").get_text())
 		ciclo = int(self.glade.get_object("entry4").get_text())
-		sensor = int(self.glade.get_object("combobox1").get_active())
-		IniciarCensado(self,nombre,ciclo,sensor,0)
+		#sensor = int(self.glade.get_object("combobox1").get_active())
+		IniciarCensado(self,nombre,ciclo,0)
 		
 
 	def stopButton(self,widget):
@@ -422,7 +422,7 @@ class App():
 		self.glade.get_object("button1").set_sensitive(True)
 		self.glade.get_object("entry3").set_sensitive(True)
 		self.glade.get_object("entry4").set_sensitive(True)
-		self.glade.get_object("combobox1").set_sensitive(True)
+		#self.glade.get_object("combobox1").set_sensitive(True)
 		self.glade.get_object("label7").set_markup('<span color="red">-</span>')
 		self.glade.get_object("label11").set_markup('<span color="red">-</span>')
 		self.glade.get_object("label15").set_markup('<span color="red">-</span>')
@@ -480,10 +480,10 @@ class Terminal():
 					print("	-Estado --> Corriendo")
 					print("	-Nombre --> %s" %(Nombre()))
 					print("	-Ciclo --> %i" %(Ciclo()))
-					if (Sensor() == 0):
+					"""if (Sensor() == 0):
 						print("	-Sensor --> DHT11")
 					else:
-						print("	-Sensor --> DHT22")
+						print("	-Sensor --> DHT22")"""
 				else:
 					print("	-Estado --> Detenido")
 					
@@ -495,7 +495,7 @@ class Terminal():
 					
 			elif(comando[0] == "ayuda"): #Imprimo ayuda en pantalla
 				print("	-ayuda --> Menu de ayuda")
-				print("	-iniciar nombre ciclo sensor(DHT11/DHT22) --> Crea una nueva sesion")
+				print("	-iniciar nombre ciclo --> Crea una nueva sesion")
 				print("	-terminar --> Termina la sesion actual")
 				print("	-bajar nombre --> Baja los datos de la sesion actual")
 				print("	-estado --> Muestra el estado del sistema ")

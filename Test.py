@@ -20,10 +20,10 @@ MAX_VECES = 3
 def Test(labels):
 	veces = 0;
 	for i in range(len(pines)):
-		salida = subprocess.Popen(["sudo","/home/pi/Desktop/Python/Adafruit_DHT2","22",pines[i]],stdout=subprocess.PIPE).communicate()[0]
+		salida = subprocess.Popen(["sudo","/home/pi/Desktop/HumTemp/Adafruit_DHT2","22",pines[i]],stdout=subprocess.PIPE).communicate()[0]
 		while (salida == "" and veces <= MAX_VECES): #Intento tomar la medida
 			sleep(1)
-			salida = subprocess.Popen(["sudo","/home/pi/Desktop/Python/Adafruit_DHT2","22",pines[i]],stdout=subprocess.PIPE).communicate()[0]   
+			salida = subprocess.Popen(["sudo","/home/pi/Desktop/HumTemp/Adafruit_DHT2","22",pines[i]],stdout=subprocess.PIPE).communicate()[0]   
 			veces = veces +1
 
 		#values.append(salida)

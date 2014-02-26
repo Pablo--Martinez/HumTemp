@@ -28,6 +28,10 @@ SET default_tablespace = '';
 
 SET default_with_oids = false;
 
+DROP TABLE control;
+DROP TABLE registro;
+DROP TABLE sesion;
+
 --
 -- Name: control; Type: TABLE; Schema: public; Owner: pi; Tablespace: 
 --

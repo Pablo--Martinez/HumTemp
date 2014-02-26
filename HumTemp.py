@@ -57,8 +57,8 @@ if status["ESTADO"] == 1:#Esta corriendo
 	        	intentos = 0
 
 	else:
-        	cant = sesion["CANT"] + 1
-	        cursor.execute("UPDATE sesion SET \"CANT\"=%s WHERE \"ID\"=%s",(CANT,sesion["ID"]))
+        	
+	        cursor.execute("UPDATE sesion SET \"CONT\"=%s WHERE \"ID\"=%s",(sesion["CONT"]+1,sesion["ID"]))
 		db.commit()
                 
 db.close() #Detengo la conexion com la base
